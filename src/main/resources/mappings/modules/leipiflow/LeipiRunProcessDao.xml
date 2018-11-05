@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.leipiflow.dao.LeipiRunProcessDao">
+    
+	<sql id="leipiRunProcessColumns">
+		a.id AS "id",
+		a.upid AS "upid",
+		a.run_id AS "runId",
+		a.run_flow AS "runFlow",
+		a.run_flow_process AS "runFlowProcess",
+		a.parent_flow AS "parentFlow",
+		a.parent_flow_process AS "parentFlowProcess",
+		a.run_child AS "runChild",
+		a.remark AS "remark",
+		a.is_receive_type AS "isReceiveType",
+		a.is_sponsor AS "isSponsor",
+		a.is_singpost AS "isSingpost",
+		a.is_back AS "isBack",
+		a.status AS "status",
+		a.js_time AS "jsTime",
+		a.bl_time AS "blTime",
+		a.jj_time AS "jjTime",
+		a.is_del AS "isDel",
+		a.updatetime AS "updatetime",
+		a.dateline AS "dateline",
+		a.agentedid AS "agentedid",
+		a.is_open AS "isOpen",
+		a.addprocessid AS "addprocessid",
+		a.addprocessdate AS "addprocessDate"
+	</sql>
+	
+	<sql id="leipiRunProcessJoins">
+		left join leipi_run b on a.run_flow=b.id
+	</sql>
+
+    <sql id="leipiRunProcessTaskJoins">
+        left join leipi_run b on a.run_flow=b.id
+        left join flowapply fa on fa.process_instance_id=b.id
+        LEFT JOIN sys_user u ON u.id = fa.create_by
+        LEFT JOIN sys_office o ON o.id = u.office_id
+    </sql>
+	
+    
+	<select id="get" resultType="LeipiRunProcess" >
+		SELECT 
+			<include refid="leipiRunProcessColumns"/>
+		FROM leipi_run_process a
+		<include refid="leipiRunProcessJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="LeipiRunProcess" >
+		SELECT 
+			<include refid="leipiRunProcessColumns"/>
+		FROM leipi_run_process a
+		<include refid="leipiRunProcessJoins"/>
+		<where>
+			<if test="status != null and status==0">
+				AND a.status = #{status} 
+			</if>
+			<if test="status != null and status==-1">
+				AND (a.status = 1 or a.status=2) AND b.status = 0
+			</if>
+			<if test="status != null and status==-2">
+				AND (a.status = 1 or a.status=2) AND (b.status = 1 or b.status = 2)
+			</if>
+			<if test="runFlow != null and runFlow != ''">
+				AND a.run_flow = #{runFlow}
+			</if>
+			<if test="upid != null and upid != ''">
+				AND a.upid = #{upid}
+			</if>
+			<if test="isDel != null">
+				AND a.is_del = #{isDel}
+			</if>
+			<if test="flowid != null and flowid != ''">
+				AND b.flow_id = #{flowid}
+			</if>
+			<if test="runFlowProcess != null and runFlowProcess != ''">
+				AND a.run_flow_process = #{runFlowProcess}
+			</if>
+			<if test="addprocessFlag != null and addprocessFlag != ''">
+				AND a.addprocessdate is null
+			</if>
+			<if test="agentedid != null and agentedid != ''">
+				AND a.agentedid = #{agentedid}
+			</if>
+			<if test="agentedidFlag != null and agentedidFlag != ''">
+				AND (a.agentedid is null or a.agentedid='')
+			</if>
+			<!--<if test="searchdays != null and searchdays != '' and searchdays != 0">
+				AND <![CDATA[to_char(a.js_time,'yyyy-mm-dd')>to_char(sysdate-#{searchdays},'yyyy-mm-dd') ]]>
+				AND <![CDATA[to_char(a.js_time,'yyyy-mm-dd')<=to_char(sysdate,'yyyy-mm-dd') ]]>
+			</if>-->
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.dateline asc
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="LeipiRunProcess" >
+		SELECT 
+			<include refid="leipiRunProcessColumns"/>
+		FROM leipi_run_process a
+		<include refid="leipiRunProcessJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO leipi_run_process(
+			id,
+			upid,
+			run_id,
+			run_flow,
+			run_flow_process,
+			parent_flow,
+			parent_flow_process,
+			run_child,
+			remark,
+			is_receive_type,
+			is_sponsor,
+			is_singpost,
+			is_back,
+			status,
+			js_time,
+			bl_time,
+			jj_time,
+			is_del,
+			updatetime,
+			dateline,
+			agentedid,
+			is_open,
+			addprocessid,
+			addprocessdate
+		) VALUES (
+			#{id},
+			#{upid},
+			#{runId},
+			#{runFlow},
+			#{runFlowProcess},
+			#{parentFlow},
+			#{parentFlowProcess},
+			#{runChild},
+			#{remark},
+			#{isReceiveType},
+			#{isSponsor},
+			#{isSingpost},
+			#{isBack},
+			#{status},
+			#{jsTime},
+			#{blTime},
+			#{jjTime},
+			#{isDel},
+			#{updatetime},
+			#{dateline},
+			#{agentedid},
+			#{isOpen},
+			#{addprocessid},
+			#{addprocessDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE leipi_run_process SET 	
+			run_flow = #{runFlow},
+			run_flow_process = #{runFlowProcess},
+			parent_flow = #{parentFlow},
+			run_child = #{runChild},
+			remark = #{remark},
+			is_receive_type = #{isReceiveType},
+			is_sponsor = #{isSponsor},
+			is_singpost = #{isSingpost},
+			is_back = #{isBack},
+			status = #{status},
+			js_time = #{jsTime},
+			bl_time = #{blTime},
+			jj_time = #{jjTime},
+			is_del = #{isDel},
+			updatetime = #{updatetime},
+			dateline = #{dateline},
+			agentedid=#{agentedid},
+			is_open=#{isOpen},
+			addprocessid=#{addprocessid},
+			addprocessdate=#{addprocessDate}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM leipi_run_process
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE leipi_run_process SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+	<!--已查阅流程-->
+	<update id="updateIsOpen">
+		UPDATE leipi_run_process SET
+		is_open = #{isOpen}
+		WHERE upid = #{upid} and run_flow = #{runFlow}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="LeipiRunProcess" statementType="STATEMENT">
+		select * FROM leipi_run_process  where ${propertyName} = '${value}'
+	</select>
+
+	<select id="findFirstList" resultType="LeipiRunProcess" >
+		SELECT * FROM (
+		SELECT
+		<include refid="leipiRunProcessColumns"/>,
+		row_number() OVER(PARTITION BY a.run_flow ORDER BY a.bl_time desc) as row_flg
+		FROM leipi_run_process a
+		<include refid="leipiRunProcessTaskJoins"/>
+		<where>
+			<if test="status != null and status==0">
+				AND a.status = #{status}
+			</if>
+			<if test="status != null and status==-1">
+				AND (a.status = 1 or a.status=2) AND b.status = 0
+			</if>
+			<if test="status != null and status==-2">
+				AND (a.status = 1 or a.status=2) AND (b.status = 1 or b.status = 2)
+			</if>
+			<if test="runFlow != null and runFlow != ''">
+				AND a.run_flow = #{runFlow}
+			</if>
+			<if test="upid != null and upid != ''">
+				AND a.upid = #{upid}
+			</if>
+			<if test="isDel != null">
+				AND a.is_del = #{isDel}
+			</if>
+			<if test="flowid != null and flowid != ''">
+				AND b.flow_id = #{flowid}
+			</if>
+			<if test="flowids != null and flowids != ''">
+				AND b.flow_id in (${flowids})
+			</if>
+			<if test="runFlowProcess != null and runFlowProcess != ''">
+				AND a.run_flow_process = #{runFlowProcess}
+			</if>
+            <if test="keyword != null and keyword != ''">
+                AND (fa.pid like
+                <if test="dbName == 'oracle'">'%'||#{keyword}||'%'</if>
+                <if test="dbName == 'mysql'">CONCAT('%', #{keyword}, '%')</if> )
+            </if>
+			<if test="keyword1 != null and keyword1 != ''">
+				AND (u.name like
+				<if test="dbName == 'oracle'">'%'||#{keyword1}||'%'</if>
+				<if test="dbName == 'mysql'">CONCAT('%', #{keyword1}, '%')</if> )
+			</if>
+			<if test="var1 != null and var1 != ''">
+				AND ((fa.var1 like
+				<if test="dbName == 'oracle'">'%'||#{var1}||'%'</if>
+				<if test="dbName == 'mysql'">CONCAT('%', #{var1}, '%')</if>) )
+			</if>
+			<if test="var2 != null and var2 != ''">
+				AND ((fa.var2 like
+				<if test="dbName == 'oracle'">'%'||#{var2}||'%'</if>
+				<if test="dbName == 'mysql'">CONCAT('%', #{var2}, '%')</if>) )
+			</if>
+			<if test="office != null and office.id != ''">
+				AND ((o.parent_ids like
+				<if test="dbName == 'oracle'">'%'||#{office.id}||'%'</if>
+				<if test="dbName == 'mysql'">CONCAT('%', #{office.id}, '%')</if>) OR (o.id =#{office.id}) )
+			</if>
+			<if test="startdate != null and startdate != ''">
+				AND <![CDATA[to_char(a.js_time,'yyyy-mm-dd')>=to_char(#{startdate},'yyyy-mm-dd') ]]>
+			</if>
+			<if test="enddate != null and enddate != ''">
+				AND <![CDATA[to_char(a.js_time,'yyyy-mm-dd')<=to_char(#{enddate},'yyyy-mm-dd') ]]>
+			</if>
+			<if test="flowtype != null and flowtype != ''">
+				AND fa.flowtype = #{flowtype}
+			</if>
+			<if test="searchdays != null and searchdays != '' and searchdays != 0">
+				AND <![CDATA[to_char(a.js_time,'yyyy-mm-dd')>to_char(sysdate-#{searchdays},'yyyy-mm-dd') ]]>
+				AND <![CDATA[to_char(a.js_time,'yyyy-mm-dd')<=to_char(sysdate,'yyyy-mm-dd') ]]>
+			</if>
+			<if test="searchdatefrom != null and searchdatefrom != ''">
+				AND <![CDATA[to_char(a.js_time,'yyyy-mm-dd')>=to_char(#{searchdatefrom},'yyyy-mm-dd') ]]>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.dateline asc
+			</otherwise>
+		</choose>
+		) WHERE row_flg = 1
+	</select>
+</mapper>

@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.ehr.dao.TraineeDao">
+    
+	<sql id="traineeColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.trainplan AS "trainplan.id",
+		a.userid AS "userid",
+		a.username AS "username",
+		a.officeid AS "officeid",
+		a.officename AS "officename"
+	</sql>
+	
+	<sql id="traineeJoins">
+		LEFT JOIN trainplan b ON b.id = a.trainplan
+		LEFT JOIN sys_user username ON username.id = a.username
+		LEFT JOIN sys_office officename ON officename.id = a.officename
+	</sql>
+	
+    
+	<select id="get" resultType="Trainee" >
+		SELECT 
+			<include refid="traineeColumns"/>
+		FROM trainee a
+		<include refid="traineeJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Trainee" >
+		SELECT 
+			<include refid="traineeColumns"/>
+		FROM trainee a
+		<include refid="traineeJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="trainplan != null and trainplan.id != null and trainplan.id != ''">
+				AND a.trainplan = #{trainplan.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Trainee" >
+		SELECT 
+			<include refid="traineeColumns"/>
+		FROM trainee a
+		<include refid="traineeJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO trainee(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			trainplan,
+			userid,
+			username,
+			officeid,
+			officename
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{trainplan.id},
+			#{userid},
+			#{username},
+			#{officeid},
+			#{officename}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE trainee SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			trainplan = #{trainplan.id},
+			userid = #{userid},
+			username = #{username},
+			officeid = #{officeid},
+			officename = #{officename}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM trainee
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE trainplan = #{trainplan.id}
+			</otherwise>
+		</choose>
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE trainee SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE trainplan = #{trainplan.id}
+			</otherwise>
+		</choose>
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="Trainee" statementType="STATEMENT">
+		select * FROM trainee  where ${propertyName} = '${value}'
+	</select>
+
+	<delete id="deleteByTrainplanId">
+		DELETE FROM trainee
+		WHERE trainplan = #{trainplanId}
+	</delete>
+
+	<insert id="insertAll" parameterType="List">
+		INSERT INTO trainee(
+		ID,
+		trainplan,
+		userid,
+		username,
+		officeid,
+		officename,
+		create_date,
+		del_flag
+		)
+		<foreach collection="list" item="e" separator=" UNION ALL ">
+			SELECT
+			#{e.id},
+			#{e.trainplan.id},
+			#{e.userid},
+			#{e.username},
+			#{e.officeid},
+			#{e.officename},
+			#{e.createDate},
+			#{e.delFlag}
+			FROM dual
+		</foreach>
+	</insert>
+</mapper>

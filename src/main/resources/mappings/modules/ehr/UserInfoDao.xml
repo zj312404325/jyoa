@@ -1,0 +1,520 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.ehr.dao.UserInfoDao">
+    
+	<sql id="userInfoColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.fullname AS "fullname",
+		a.usedfullname AS "usedfullname",
+		a.sex AS "sex",
+		a.bodyheight AS "bodyheight",
+		a.bodyweight AS "bodyweight",
+		a.blood AS "blood",
+		a.political AS "political",
+		a.birthday AS "birthday",
+		a.idcardno AS "idcardno",
+		a.origin AS "origin",
+		a.nation AS "nation",
+		a.religion AS "religion",
+		a.phone AS "phone",
+		a.mobile AS "mobile",
+		a.email AS "email",
+		a.degree AS "degree",
+		a.profession AS "profession",
+		a.college AS "college",
+		a.languages AS "languages",
+		a.marriage AS "marriage",
+		a.disease AS "disease",
+		a.workstatus AS "workstatus",
+		a.isfamily AS "isfamily",
+		a.iscompetition AS "iscompetition",
+		a.iscardurl AS "iscardurl",
+		a.certificateurl AS "certificateurl",
+		a.degreecertificateurl AS "degreecertificateurl",
+		a.driverlicenseurl AS "driverlicenseurl",
+		a.qualificationcertificateurl AS "qualificationcertificateurl",
+		a.leavingcertificate AS "leavingcertificate",
+		a.resumeurl AS "resumeurl",
+		a.address AS "address",
+		a.position AS "position",
+		a.probationperiod AS "probationperiod",
+		a.probationperiodsalary AS "probationperiodsalary",
+		a.disclaimername AS "disclaimername",
+		a.disclaimerno AS "disclaimerno",
+		a.disclaimeryear AS "disclaimeryear",
+		a.disclaimermonth AS "disclaimermonth",
+		a.disclaimerday AS "disclaimerday",
+		a.disclaimerdisease AS "disclaimerdisease",
+		a.photo AS "photo",
+		a.status AS "status",
+		a.contract AS "contract",
+		a.ispermit AS "ispermit",
+		a.startdate AS "startdate",
+		a.enddate AS "enddate",
+		a.entrytrain AS "entrytrain",
+		a.entrytrain1 AS "entrytrain1",
+		a.entrytrain2 AS "entrytrain2",
+		a.entrytrain3 AS "entrytrain3",
+		a.entrytrain4 AS "entrytrain4",
+		a.entrytrain5 AS "entrytrain5",
+		a.entrytrain6 AS "entrytrain6",
+		a.entrytrain7 AS "entrytrain7",
+		a.entrytrain8 AS "entrytrain8",
+		a.entrytrain9 AS "entrytrain9",
+		a.entrytrain10 AS "entrytrain10",
+		a.entrytrain11 AS "entrytrain11",
+		a.entrytrain12 AS "entrytrain12",
+		a.entrytraindate AS "entrytraindate",
+		a.leavestatus AS "leavestatus",
+		a.leavedate AS "leavedate",
+		a.leaveurl AS "leaveurl",
+		o.name AS "office.name",
+		a.bankcardurl AS "bankcardurl",
+		a.healthurl AS "healthurl",
+		a.resignation AS "resignation"
+	</sql>
+	
+	<sql id="userInfoJoins">
+	 LEFT JOIN sys_user c ON c.id = a.create_by
+	 LEFT JOIN sys_office o ON o.id = c.office_id
+	</sql>
+	
+    
+	<select id="get" resultType="UserInfo" >
+		SELECT 
+			<include refid="userInfoColumns"/>
+		FROM sys_user_info a
+		<include refid="userInfoJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="getByCreateBy" resultType="UserInfo" >
+		SELECT 
+			<include refid="userInfoColumns"/>
+		FROM sys_user_info a
+		<include refid="userInfoJoins"/>
+		WHERE a.create_by = #{createBy.id}
+	</select>
+	
+	<select id="findList" resultType="UserInfo" >
+		SELECT 
+			<include refid="userInfoColumns"/>
+		FROM sys_user_info a
+		<include refid="userInfoJoins"/>
+		<where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="user_del_flag != null and user_del_flag == 0  ">
+                AND c.del_flag = '0' and c.login_flag = '1'
+			</if>
+			<if test="fullname != null and fullname != ''">
+				AND a.fullname LIKE 
+						<if test="dbName == 'oracle'">'%'||#{fullname}||'%'</if>
+						<if test="dbName == 'mysql'">CONCAT('%', #{fullname}, '%')</if>
+			</if>
+			<if test="status != null and status != '' and status != '-1'">
+				AND a.status = #{status}
+			</if>
+			<if test="statustemp != null and statustemp >= 0" >
+				AND a.status >=0 AND a.status = #{statustemp}
+			</if>
+			<if test="officeid != null and officeid != ''">
+				AND (c.office_id = #{officeid} or o.parent_ids LIKE
+				<if test="dbName == 'oracle'">'%'||#{officeid}||'%'</if>
+				<if test="dbName == 'mysql'">CONCAT('%', #{officeid}, '%')</if>)
+			</if>
+			<if test="deptid != null and deptid != ''">
+				AND c.office_true_id = #{deptid} 
+			</if>
+			<if test="ispermittemp != null and ispermittemp != ''" >
+				AND a.ispermit >=0
+				<if test="ispermit != null and ispermit >=0">
+					AND a.ispermit = #{ispermit} 
+				</if>
+			</if>
+			<if test="contract != null and contract != ''">
+				AND a.contract is not null
+			</if>
+			<if test="leaveurl != null and leaveurl != ''">
+				AND a.leavedate is not null
+			</if>
+			<if test="office != null and office.id != ''">
+				AND ((o.parent_ids like
+				<if test="dbName == 'oracle'">'%'||#{office.id}||'%'</if>
+				<if test="dbName == 'mysql'">CONCAT('%', #{office.id}, '%')</if>) OR (o.id =#{office.id}) )
+			</if>
+			<if test="userid != null and userid != ''">
+				AND a.create_by=#{userid}
+			</if>
+			<if test="searchdays != null and searchdays != '' and searchdays != 0">
+				AND <![CDATA[to_char(a.create_date,'yyyy-mm-dd')>to_char(sysdate-#{searchdays},'yyyy-mm-dd') ]]>
+				AND <![CDATA[to_char(a.create_date,'yyyy-mm-dd')<=to_char(sysdate,'yyyy-mm-dd') ]]>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="UserInfo" >
+		SELECT 
+			<include refid="userInfoColumns"/>
+		FROM sys_user_info a
+		<include refid="userInfoJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sys_user_info(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			fullname,
+			usedfullname,
+			sex,
+			bodyheight,
+			bodyweight,
+			blood,
+			political,
+			birthday,
+			idcardno,
+			origin,
+			nation,
+			religion,
+			phone,
+			mobile,
+			email,
+			degree,
+			profession,
+			college,
+			languages,
+			marriage,
+			disease,
+			workstatus,
+			isfamily,
+			iscompetition,
+			iscardurl,
+			certificateurl,
+			degreecertificateurl,
+			driverlicenseurl,
+			qualificationcertificateurl,
+			leavingcertificate,
+			resumeurl,
+			address,
+			position,
+			probationperiod,
+			probationperiodsalary,
+			disclaimername,
+			disclaimerno,
+			disclaimeryear,
+			disclaimermonth,
+			disclaimerday,
+			disclaimerdisease,
+			photo,
+			status,
+			contract,
+			ispermit,
+			startdate,
+			enddate,
+			entrytrain,
+			entrytrain1,
+			entrytrain2,
+			entrytrain3,
+			entrytrain4,
+			entrytrain5,
+			entrytrain6,
+			entrytrain7,
+			entrytrain8,
+			entrytrain9,
+			entrytrain10,
+			entrytrain11,
+			entrytrain12,
+			entrytraindate,
+			leavestatus,
+			leavedate,
+			leaveurl,
+			bankcardurl,
+			healthurl,
+			resignation
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{fullname},
+			#{usedfullname},
+			#{sex},
+			#{bodyheight},
+			#{bodyweight},
+			#{blood},
+			#{political},
+			#{birthday},
+			#{idcardno},
+			#{origin},
+			#{nation},
+			#{religion},
+			#{phone},
+			#{mobile},
+			#{email},
+			#{degree},
+			#{profession},
+			#{college},
+			#{languages},
+			#{marriage},
+			#{disease},
+			#{workstatus},
+			#{isfamily},
+			#{iscompetition},
+			#{iscardurl},
+			#{certificateurl},
+			#{degreecertificateurl},
+			#{driverlicenseurl},
+			#{qualificationcertificateurl},
+			#{leavingcertificate},
+			#{resumeurl},
+			#{address},
+			#{position},
+			#{probationperiod},
+			#{probationperiodsalary},
+			#{disclaimername},
+			#{disclaimerno},
+			#{disclaimeryear},
+			#{disclaimermonth},
+			#{disclaimerday},
+			#{disclaimerdisease},
+			#{photo},
+			#{status},
+			#{contract},
+			#{ispermit},
+			#{startdate},
+			#{enddate},
+			#{entrytrain},
+			#{entrytrain1},
+			#{entrytrain2},
+			#{entrytrain3},
+			#{entrytrain4},
+			#{entrytrain5},
+			#{entrytrain6},
+			#{entrytrain7},
+			#{entrytrain8},
+			#{entrytrain9},
+			#{entrytrain10},
+			#{entrytrain11},
+			#{entrytrain12},
+			#{entrytraindate},
+			#{leavestatus},
+			#{leavedate},
+			#{leaveurl},
+			#{bankcardurl},
+			#{healthurl},
+			#{resignation}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE sys_user_info SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			fullname = #{fullname},
+			usedfullname = #{usedfullname},
+			sex = #{sex},
+			bodyheight = #{bodyheight},
+			bodyweight = #{bodyweight},
+			blood = #{blood},
+			political = #{political},
+			birthday = #{birthday},
+			idcardno = #{idcardno},
+			origin = #{origin},
+			nation = #{nation},
+			religion = #{religion},
+			phone = #{phone},
+			mobile = #{mobile},
+			email = #{email},
+			degree = #{degree},
+			profession = #{profession},
+			college = #{college},
+			languages = #{languages},
+			marriage = #{marriage},
+			disease = #{disease},
+			workstatus = #{workstatus},
+			isfamily = #{isfamily},
+			iscompetition = #{iscompetition},
+			iscardurl = #{iscardurl},
+			certificateurl = #{certificateurl},
+			degreecertificateurl = #{degreecertificateurl},
+			driverlicenseurl = #{driverlicenseurl},
+			qualificationcertificateurl = #{qualificationcertificateurl},
+			leavingcertificate = #{leavingcertificate},
+			resumeurl = #{resumeurl},
+			address = #{address},
+			position = #{position},
+			probationperiod = #{probationperiod},
+			probationperiodsalary = #{probationperiodsalary},
+			disclaimername = #{disclaimername},
+			disclaimerno = #{disclaimerno},
+			disclaimeryear = #{disclaimeryear},
+			disclaimermonth = #{disclaimermonth},
+			disclaimerday = #{disclaimerday},
+			disclaimerdisease = #{disclaimerdisease},
+			photo = #{photo},
+			status = #{status},
+			contract = #{contract},
+			ispermit = #{ispermit},
+			startdate = #{startdate},
+			enddate = #{enddate},
+			entrytrain = #{entrytrain},
+			entrytrain1 = #{entrytrain1},
+			entrytrain2 = #{entrytrain2},
+			entrytrain3 = #{entrytrain3},
+			entrytrain4 = #{entrytrain4},
+			entrytrain5 = #{entrytrain5},
+			entrytrain6 = #{entrytrain6},
+			entrytrain7 = #{entrytrain7},
+			entrytrain8 = #{entrytrain8},
+			entrytrain9 = #{entrytrain9},
+			entrytrain10 = #{entrytrain10},
+			entrytrain11 = #{entrytrain11},
+			entrytrain12 = #{entrytrain12},
+			entrytraindate = #{entrytraindate},
+			leavestatus = #{leavestatus},
+			leavedate = #{leavedate},
+			leaveurl = #{leaveurl},
+			bankcardurl = #{bankcardurl},
+			healthurl = #{healthurl},
+			resignation = #{resignation}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM sys_user_info
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE sys_user_info SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="UserInfo" statementType="STATEMENT">
+		select * FROM sys_user_info  where ${propertyName} = '${value}'
+	</select>
+	
+	<select id="findTrainList" resultType="UserInfo" >
+		SELECT DISTINCT
+			<include refid="userInfoColumns"/>
+		FROM sys_user_info a
+		left join sys_user u on a.create_by = u.id
+		left join sys_user_role r on r.user_id = a.create_by
+		LEFT JOIN sys_office o ON o.id = u.office_id
+		<where>
+			 u.id != '1'
+			<if test="DEL_FLAG_NORMAL != null">
+				and a.del_flag = #{DEL_FLAG_NORMAL}
+			</if>
+			<if test="fullname != null and fullname != ''">
+				AND a.fullname LIKE 
+						<if test="dbName == 'oracle'">'%'||#{fullname}||'%'</if>
+						<if test="dbName == 'mysql'">CONCAT('%', #{fullname}, '%')</if>
+			</if>
+			<if test="createBy != null and createBy.role != null and createBy.role.id != null and createBy.role.id != ''">
+				AND r.role_id = #{createBy.role.id} 
+			</if>
+			<if test="entrytrain != null ">
+				AND a.entrytrain = #{entrytrain} 
+			</if>
+			<if test="ispermit != null and ispermit != '' and ispermit == -2" >
+				AND a.ispermit >=0
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<!--物理删除-->
+	<update id="deleteUserInfoByUser">
+		UPDATE sys_user_info SET
+			del_flag = '1'
+		WHERE create_by = #{id}
+	</update>
+
+	<select id="findPeopleStructList" resultType="java.util.Map" >
+		SELECT
+		<choose>
+			<when test='peopleStructType == "1"'>
+				(round((select count(1) from sys_user_info t where del_flag='0' and sex='1')/
+				(select count(1) from sys_user_info where del_flag='0' and sex is not null),
+				2) * 100 || '%') as male,
+				(round((select count(1) from sys_user_info t where del_flag='0' and sex='2')/
+				(select count(1) from sys_user_info where del_flag='0'and sex is not null),
+				2) * 100 || '%') as female
+			</when>
+			<otherwise>
+				(to_char(round((select count(1) from sys_user_info t where del_flag='0' and degree='0')/
+				(select count(1) from sys_user_info where del_flag='0'),
+				4) * 100,'fm9999999990.00') || '%') as var1,
+				(to_char(round((select count(1) from sys_user_info t where del_flag='0' and degree='1')/
+				(select count(1) from sys_user_info where del_flag='0'),
+				4) * 100,'fm9999999990.00') || '%') as var2,
+				(to_char(round((select count(1) from sys_user_info t where del_flag='0' and degree='2')/
+				(select count(1) from sys_user_info where del_flag='0'),
+				4) * 100,'fm9999999990.00') || '%') as var3,
+				(to_char(round((select count(1) from sys_user_info t where del_flag='0' and degree='3')/
+				(select count(1) from sys_user_info where del_flag='0'),
+				4) * 100,'fm9999999990.00') || '%') as var4,
+				(to_char(round((select count(1) from sys_user_info t where del_flag='0' and degree='4')/
+				(select count(1) from sys_user_info where del_flag='0'),
+				4) * 100,'fm9999999990.00') || '%') as var5,
+				(to_char(round((select count(1) from sys_user_info t where del_flag='0' and degree='5')/
+				(select count(1) from sys_user_info where del_flag='0'),
+				4) * 100,'fm9999999990.00') || '%') as var6,
+				(to_char(round((select count(1) from sys_user_info t where del_flag='0' and degree='6')/
+				(select count(1) from sys_user_info where del_flag='0'),
+				4) * 100,'fm9999999990.00') || '%') as var7,
+				(to_char(round((select count(1) from sys_user_info t where del_flag='0' and degree='7')/
+				(select count(1) from sys_user_info where del_flag='0'),
+				4) * 100,'fm9999999990.00') || '%') as var8
+			</otherwise>
+		</choose>
+		FROM dual
+	</select>
+</mapper>

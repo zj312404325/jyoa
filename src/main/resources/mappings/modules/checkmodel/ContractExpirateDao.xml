@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.checkmodel.dao.ContractExpirateDao">
+    
+	<sql id="contractExpirateColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.userid AS "userid",
+		a.userno AS "userno",
+		a.username AS "username",
+		a.officeid AS "officeid",
+		a.officename AS "officename",
+		a.stationid AS "stationid",
+		a.stationname AS "stationname",
+		a.major AS "major",
+		a.education AS "education",
+		a.birth AS "birth",
+		a.entrytime AS "entrytime",
+		a.address AS "address",
+		a.contractdatestart AS "contractdatestart",
+		a.contractdateend AS "contractdateend",
+		a.checkuserid AS "checkuserid",
+		a.checkuserno AS "checkuserno",
+		a.checkusername AS "checkusername",
+		a.checkofficeid AS "checkofficeid",
+		a.checkofficename AS "checkofficename",
+		a.checkstationid AS "checkstationid",
+		a.checkstationname AS "checkstationname",
+		a.knowledgeskill AS "knowledgeskill",
+		a.execute AS "execute",
+		a.organization AS "organization",
+		a.formulate AS "formulate",
+		a.learn AS "learn",
+		a.innovate AS "innovate",
+		a.score AS "score",
+		a.evaluate AS "evaluate",
+		a.recommend AS "recommend",
+		a.recommendother AS "recommendother",
+		a.leaderrecommend AS "leaderrecommend",
+		a.hrrecommend AS "hrrecommend",
+		a.ceorecommend AS "ceorecommend",
+		a.hasaudit AS "hasaudit",
+		a.status AS "status"
+	</sql>
+	
+	<sql id="contractExpirateJoins">
+		left join sys_office o on a.officeid=o.id
+	</sql>
+	
+    
+	<select id="get" resultType="ContractExpirate" >
+		SELECT 
+			<include refid="contractExpirateColumns"/>
+		FROM contractexpirate a
+		<include refid="contractExpirateJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="ContractExpirate" >
+		SELECT 
+			<include refid="contractExpirateColumns"/>
+		FROM contractexpirate a
+		<include refid="contractExpirateJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL} 
+			<if test="userno != null and userno != ''">
+				AND a.userno like 
+					<if test="dbName == 'oracle'">'%'||#{userno}||'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{userno}, '%')</if>
+			</if>
+			<if test="username != null and username != ''">
+				AND a.username like 
+					<if test="dbName == 'oracle'">'%'||#{username}||'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{username}, '%')</if>
+			</if>
+			<if test="officeid != null and officeid != ''">
+				AND ((o.parent_ids like <if test="dbName == 'oracle'">'%'||#{officeid}||'%'</if>
+				<if test="dbName == 'mysql'">CONCAT('%', #{officeid}, '%')</if>) or a.officeid =#{officeid})
+			</if>
+			<if test="createBy != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+			<if test="userid != null and userid != ''">
+				AND a.userid = #{userid}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="ContractExpirate" >
+		SELECT 
+			<include refid="contractExpirateColumns"/>
+		FROM contractexpirate a
+		<include refid="contractExpirateJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO contractexpirate(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			userid,
+			userno,
+			username,
+			officeid,
+			officename,
+			stationid,
+			stationname,
+			major,
+			education,
+			birth,
+			entrytime,
+			address,
+			contractdatestart,
+			contractdateend,
+			checkuserid,
+			checkuserno,
+			checkusername,
+			checkofficeid,
+			checkofficename,
+			checkstationid,
+			checkstationname,
+			knowledgeskill,
+			execute,
+			organization,
+			formulate,
+			learn,
+			innovate,
+			score,
+			evaluate,
+			recommend,
+			recommendother,
+			leaderrecommend,
+			hrrecommend,
+			ceorecommend,
+			hasaudit,
+			status
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{userid},
+			#{userno},
+			#{username},
+			#{officeid},
+			#{officename},
+			#{stationid},
+			#{stationname},
+			#{major},
+			#{education},
+			#{birth},
+			#{entrytime},
+			#{address},
+			#{contractdatestart},
+			#{contractdateend},
+			#{checkuserid},
+			#{checkuserno},
+			#{checkusername},
+			#{checkofficeid},
+			#{checkofficename},
+			#{checkstationid},
+			#{checkstationname},
+			#{knowledgeskill},
+			#{execute},
+			#{organization},
+			#{formulate},
+			#{learn},
+			#{innovate},
+			#{score},
+			#{evaluate},
+			#{recommend},
+			#{recommendother},
+			#{leaderrecommend},
+			#{hrrecommend},
+			#{ceorecommend},
+			#{hasaudit},
+			#{status}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE contractexpirate SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			userid = #{userid},
+			userno = #{userno},
+			username = #{username},
+			officeid = #{officeid},
+			officename = #{officename},
+			stationid = #{stationid},
+			stationname = #{stationname},
+			major = #{major},
+			education = #{education},
+			birth = #{birth},
+			entrytime = #{entrytime},
+			address = #{address},
+			contractdatestart = #{contractdatestart},
+			contractdateend = #{contractdateend},
+			checkuserid = #{checkuserid},
+			checkuserno = #{checkuserno},
+			checkusername = #{checkusername},
+			checkofficeid = #{checkofficeid},
+			checkofficename = #{checkofficename},
+			checkstationid = #{checkstationid},
+			checkstationname = #{checkstationname},
+			knowledgeskill = #{knowledgeskill},
+			execute = #{execute},
+			organization = #{organization},
+			formulate = #{formulate},
+			learn = #{learn},
+			innovate = #{innovate},
+			score = #{score},
+			evaluate = #{evaluate},
+			recommend = #{recommend},
+			recommendother = #{recommendother},
+			leaderrecommend = #{leaderrecommend},
+			hrrecommend = #{hrrecommend},
+			ceorecommend = #{ceorecommend},
+			hasaudit = #{hasaudit},
+			status = #{status}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM contractexpirate
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE contractexpirate SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="ContractExpirate" statementType="STATEMENT">
+		select * FROM contractexpirate  where ${propertyName} = '${value}'
+	</select>
+	
+	<sql id="userColumnsCheck">
+       a.id,
+       a.office_id AS "officeid",
+       a.office_true_id AS "officeTrueId",
+       o1.name AS "officename",
+       (case when o1.id=o.id then '' else o.name end) AS "stationname",
+       a.no AS "userno",
+       a.name AS "username",
+       a.create_by AS "createBy.id",
+       a.create_date,
+       a.update_by AS "updateBy.id",
+       a.update_date,
+       a.del_flag,
+       inf.startdate as "startdate",
+       inf.enddate as "enddate",
+       inf.contract as "contract"
+    </sql>
+    
+    <sql id="userJoinsCheck">
+		LEFT JOIN sys_office o1 ON o1.id = a.office_true_id 
+		LEFT JOIN sys_office o ON o.id = a.office_id
+    </sql>
+	
+	<select id="searchContractExpirateList"  resultType="ContractExpirate">
+		SELECT
+			<include refid="userColumnsCheck"/>
+		FROM sys_user_info inf left join sys_user a on(inf.create_by=a.id)
+	  	<include refid="userJoinsCheck"/> WHERE 1=1 and a.del_flag = #{DEL_FLAG_NORMAL}
+		AND to_char(sysdate+interval '3' month,'yyyy-mm-dd')&gt;=to_char(inf.enddate,'yyyy-mm-dd')
+	</select>
+</mapper>

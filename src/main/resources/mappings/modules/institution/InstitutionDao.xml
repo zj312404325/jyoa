@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.institution.dao.InstitutionDao">
+    
+	<sql id="institutionColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.title AS "title",
+		a.content AS "content",
+		a.parent_id AS "parent.id",
+		a.parent_ids AS "parentIds",
+		a.name AS "name",
+		a.sort AS "sort",
+		a.ilevel AS "ilevel",
+		a.itype AS "itype",
+		a.fileurl AS "fileurl",
+		a.receivedeptids AS "receivedeptids",
+		a.receivedeptnames AS "receivedeptnames",
+		a.sourcefileurl AS "sourcefileurl"
+	</sql>
+	
+	<sql id="institutionColumns2">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.title AS "title",
+		a.parent_id AS "parent.id",
+		a.parent_ids AS "parentIds",
+		a.name AS "name",
+		a.sort AS "sort",
+		a.ilevel AS "ilevel",
+		a.itype AS "itype",
+		a.fileurl AS "fileurl",
+		a.receivedeptids AS "receivedeptids",
+		a.receivedeptnames AS "receivedeptnames",
+		a.sourcefileurl AS "sourcefileurl"
+	</sql>
+	
+	<sql id="institutionJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="Institution" >
+		SELECT 
+			<include refid="institutionColumns"/>
+		FROM institution a
+		<include refid="institutionJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Institution" >
+		SELECT 
+			<include refid="institutionColumns2"/>
+		FROM institution a
+		<include refid="institutionJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="itype != null and itype != ''">
+				AND a.itype = #{itype}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.sort ASC,a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Institution" >
+		SELECT 
+			<include refid="institutionColumns2"/>
+		FROM institution a
+		<include refid="institutionJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="parent.id != null and parent.id != ''">
+				AND parent_id = #{parent.id}
+			</if>
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.sort ASC,a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO institution(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			title,
+			content,
+			parent_id,
+			parent_ids,
+			name,
+			sort,
+			ilevel,
+			itype,
+			fileurl,
+			receivedeptids,
+		    receivedeptnames,
+		    sourcefileurl
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{title},
+			#{content},
+			#{parent.id},
+			#{parentIds},
+			#{name},
+			#{sort},
+			#{ilevel},
+			#{itype},
+			#{fileurl},
+			#{receivedeptids},
+		    #{receivedeptnames},
+		    #{sourcefileurl}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE institution SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			title = #{title},
+			content = #{content},
+			parent_id = #{parent.id},
+			parent_ids = #{parentIds},
+			name = #{name},
+			sort = #{sort},
+			ilevel = #{ilevel},
+			itype = #{itype},
+			fileurl = #{fileurl},
+			receivedeptids=#{receivedeptids},
+		    receivedeptnames=#{receivedeptnames},
+		    sourcefileurl=#{sourcefileurl}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM institution
+		WHERE id = #{id}  OR parent_ids LIKE 
+					<if test="dbName == 'oracle'">'%,'||#{id}||',%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%,', #{id}, ',%')</if>
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE institution SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="Institution" statementType="STATEMENT">
+		select * FROM institution  where ${propertyName} = '${value}'
+	</select>
+	
+	<select id="findByParentIdsLike" resultType="Office">
+		SELECT
+			<include refid="institutionColumns"/>
+		FROM institution a
+		<include refid="institutionJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL} AND a.parent_ids LIKE #{parentIds}
+		ORDER BY a.sort ASC,a.update_date DESC
+	</select>
+	
+	
+	<select id="findAllListByLevel" resultType="Institution" >
+		SELECT 
+			<include refid="institutionColumns"/>
+		FROM institution a
+		<include refid="institutionJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="ilevel != null and ilevel != ''">
+				AND a.ilevel = #{ilevel}
+			</if>
+			<if test="parent.id != null and parent.id != ''">
+				AND parent_id = #{parent.id}
+			</if>
+		</where>
+		ORDER BY a.sort ASC,a.update_date DESC
+	</select>
+	
+	<select id="findListByLevel" parameterType="java.util.Map" resultType="Institution" >
+		SELECT 
+			distinct a.id,a.title,a.itype,a.sort,a.ilevel
+		FROM institution a
+		<!--left join institution a on a.id = i.institution_id -->
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="ilevel != null and ilevel != ''">
+				AND a.ilevel = #{ilevel}
+			</if>
+			<if test="parentid != null and parentid != ''">
+				AND a.parent_id = #{parentid}
+			</if>
+			<if test="roleidssql != null and roleidssql != ''">
+				${roleidssql}
+			</if>
+			<if test="officeid != null and officeid != ''">
+				AND a.receivedeptids like '%'||#{officeid}||'%'
+			</if>
+		</where>
+		ORDER BY a.sort ASC
+	</select>
+	
+	
+	<update id="updateParentIds">
+		UPDATE institution SET 
+			parent_id = #{parent.id}, 
+			parent_ids = #{parentIds}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="updateSort">
+		UPDATE institution SET 
+			sort = #{sort}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

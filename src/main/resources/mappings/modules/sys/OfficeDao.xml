@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.sys.dao.OfficeDao">
+
+	<sql id="officeColumns">
+		a.id,
+		a.topparent_id AS "topparentid",
+		a.parent_id AS "parent.id",
+		a.parent_ids As "parentIds",
+		a.area_id AS "area.id",
+		a.area AS "area.name",
+		a.isshowarea AS "isshowarea",
+		a.code,
+		a.name,
+		a.oname,
+		a.sort,
+		a.type,
+		a.grade,
+		a.address, 
+		a.zip_code, 
+		a.master, 
+		a.phone, 
+		a.fax, 
+		a.email, 
+		a.remarks,
+		a.create_by AS "createBy.id",
+		a.create_date,
+		a.update_by AS "updateBy.id",
+		a.update_date,
+		a.del_flag,
+		a.useable AS useable,
+		a.primary_person AS "primaryPerson.id",
+		a.deputy_person AS "deputyPerson.id",
+		p.name AS "parent.name",
+		ar.name AS "area.name",
+		ar.parent_ids AS "area.parentIds",
+		pp.name AS "primaryPerson.name",
+		dp.name AS "deputyPerson.name",
+		a.file1,
+		a.file2
+	</sql>
+	
+	<sql id="officeJoins">
+		LEFT JOIN sys_office p ON p.id = a.parent_id
+		LEFT JOIN sys_area ar ON ar.id = a.area_id
+		LEFT JOIN sys_user pp ON pp.id = a.primary_person
+		LEFT JOIN sys_user dp ON dp.id = a.deputy_person
+    </sql>
+	
+	<select id="get" resultType="Office">
+		SELECT
+			<include refid="officeColumns"/>
+		FROM sys_office a
+		<include refid="officeJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="getMenuIds" resultType="java.lang.String">
+		select menu_id as menuid from sys_office_menu a WHERE a.office_id = #{id}
+	</select>
+		
+	<select id="getByCode" resultType="Office">
+		SELECT
+			<include refid="officeColumns"/>
+		FROM sys_office a
+		<include refid="officeJoins"/>
+		
+		WHERE a.code = #{code}
+	</select>
+	<select id="getByName" resultType="Office">
+		SELECT
+			<include refid="officeColumns"/>
+		FROM sys_office a
+		<include refid="officeJoins"/>
+		
+		WHERE a.name = #{name}
+	</select>
+	<select id="findList" resultType="Office">
+		SELECT
+			<include refid="officeColumns"/>
+		FROM sys_office a
+		<include refid="officeJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<!-- OR a.id = #{currentUser.office.id} -->
+		OR a.topparent_id = #{topparentid}
+		OR a.id = #{topparentid}
+		ORDER BY a.grade asc,a.create_date asc
+		<!-- ORDER BY a.code -->
+	</select>
+	<select id="findListByType" resultType="Office">
+		SELECT
+		<include refid="officeColumns"/>
+		FROM sys_office a
+		<include refid="officeJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<if test="type != null and type != ''">
+			AND a.type = #{type}
+		</if>
+		ORDER BY p.grade asc,a.grade asc,a.create_date asc
+		<!-- ORDER BY a.code -->
+	</select>
+    <select id="findListByParentId" resultType="Office">
+        SELECT
+        <include refid="officeColumns"/>
+        FROM sys_office a
+        <include refid="officeJoins"/>
+        WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+        <if test="parent != null and parent.id != null and parent.id != ''">
+            AND a.parent_id = #{parent.id}
+        </if>
+        ORDER BY p.grade asc,a.grade asc,a.create_date asc
+        <!-- ORDER BY a.code -->
+    </select>
+			
+	<select id="findAllList" resultType="Office">
+		SELECT
+			<include refid="officeColumns"/>
+		FROM sys_office a
+		<include refid="officeJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		ORDER BY a.grade asc,a.create_date asc
+		<!-- ORDER BY a.code -->
+	</select>
+	
+	<select id="findByParentIdsLike" resultType="Office">
+		SELECT
+			<include refid="officeColumns"/>
+		FROM sys_office a
+		<include refid="officeJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<if test="parentIds != '' and parentIds != null">
+		 AND a.parent_ids LIKE 
+		<if test="dbName == 'oracle'">'%'||#{parentIds}||'%'</if>
+		<if test="dbName == 'mysql'">CONCAT('%', #{parentIds}, '%')</if>
+		and a.parent_ids != #{parentIds}
+		</if>
+		ORDER BY a.grade asc,a.create_date asc
+		<!-- ORDER BY a.code -->
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sys_office(
+			id, 
+			topparent_id, 
+			parent_id, 
+			parent_ids, 
+			area_id,
+			area,
+			isshowarea,
+			code, 
+			name,
+			oname,
+			sort, 
+			type, 
+			grade, 
+			address, 
+			zip_code, 
+			master, 
+			phone, 
+			fax, 
+			email, 
+			create_by, 
+			create_date, 
+			update_by, 
+			update_date, 
+			remarks, 
+			del_flag,
+			useable,
+			primary_person,
+			deputy_person,
+			file1,
+			file2
+		) VALUES (
+			#{id}, 
+			#{topparentid}, 
+			#{parent.id}, 
+			#{parentIds}, 
+			#{area.id},
+			#{area.name},
+			#{isshowarea},
+			#{code}, 
+			#{name},
+			#{oname},
+			#{sort}, 
+			#{type}, 
+			#{grade}, 
+			#{address}, 
+			#{zipCode}, 
+			#{master}, 
+			#{phone}, 
+			#{fax}, 
+			#{email}, 
+			#{createBy.id}, 
+			#{createDate}, 
+			#{updateBy.id}, 
+			#{updateDate}, 
+			#{remarks}, 
+			#{delFlag},
+			#{useable},
+			#{primaryPerson.id},
+			#{deputyPerson.id},
+			#{file1},
+			#{file2}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE sys_office SET 
+			topparent_id = #{topparentid}, 
+			parent_id = #{parent.id}, 
+			parent_ids = #{parentIds}, 
+			area_id = #{area.id},
+			area = #{area.name},
+			isshowarea = #{isshowarea},
+			code = #{code}, 
+			name = #{name},
+			oname = #{oname},
+			type = #{type}, 
+			grade = #{grade}, 
+			address = #{address}, 
+			zip_code = #{zipCode}, 
+			master = #{master}, 
+			phone = #{phone}, 
+			fax = #{fax}, 
+			email = #{email}, 
+			update_by = #{updateBy.id}, 
+			update_date = #{updateDate}, 
+			remarks = #{remarks},
+			useable=#{useable},
+			primary_person=#{primaryPerson.id},
+			deputy_person=#{deputyPerson.id},
+			file1=#{file1},
+			file2=#{file2}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="updateParentIds">
+		UPDATE sys_office SET 
+			parent_id = #{parent.id}, 
+			parent_ids = #{parentIds}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM sys_office 
+		WHERE id = #{id} OR parent_ids LIKE 
+					<if test="dbName == 'oracle'">'%,'||#{id}||',%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%,', #{id}, ',%')</if>
+	</update>
+	
+	<update id="deleteByLogic">
+		UPDATE sys_office SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id} OR parent_ids LIKE 
+					<if test="dbName == 'oracle'">'%,'||#{id}||',%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%,', #{id}, ',%')</if>
+	</update>
+	
+	<delete id="deleteOfficeMenu">
+		DELETE FROM sys_office_menu WHERE office_id = #{id}
+	</delete>
+	
+	<insert id="insertOfficeMenu">
+		INSERT INTO sys_office_menu(office_id, menu_id)
+		<foreach collection="menuList" item="menu" separator=" union all ">
+			SELECT #{id}, #{menu.id} FROM dual
+		</foreach>
+	</insert>
+	
+	<select id="findParentOffice" resultType="Office" parameterType="java.util.Map">
+		SELECT 
+			a.id,
+		a.topparent_id AS "topparentid",
+		a.parent_id AS "parent.id",
+		a.parent_ids As "parentIds",
+		a.area_id AS "area.id",
+		a.code,
+		a.name,
+		a.sort,
+		a.type,
+		a.grade,
+		a.address, 
+		a.zip_code, 
+		a.master, 
+		a.phone, 
+		a.fax, 
+		a.email, 
+		a.remarks,
+		a.create_by AS "createBy.id",
+		a.create_date,
+		a.update_by AS "updateBy.id",
+		a.update_date,
+		a.del_flag,
+		a.useable AS useable,
+		a.primary_person AS "primaryPerson.id",
+		a.deputy_person AS "deputyPerson.id"
+		FROM sys_office a
+		WHERE a.id in(${ids}) and a.useable=#{useable} and a.type!=#{type} order by create_date desc
+	</select>
+
+	<select id="findPerformCheckList" resultType="Office">
+		SELECT
+		(select count(1) from sys_user sc where ((sc.office_id=a.id or sc.office_id in(select so.id from sys_office so where instr(so.parent_ids,a.id)>0))) and sc.del_flag='0') as peoplecount,
+		   a.id,
+		   a.name,
+		   a.topparent_id   AS "topparentid",
+		   a.parent_id      AS "parent.id",
+		   a.parent_ids     As "parentIds",
+		   a.area_id        AS "area.id",
+		   a.sort,
+		   a.type,
+		   a.grade,
+		   p.name           AS "parent.name",
+		   (select round(avg(pc.selfscore), 2) from performancecheck pc where ((pc.officeid=a.id or pc.officeid in(select sof.id from sys_office sof where instr(sof.parent_ids,a.id)>0))) and pc.del_flag='0' and (pc.category='' or pc.category is null)
+		<if test="checkyear != '' and checkyear != null">
+			and <![CDATA[pc.checkyear=#{checkyear}]]>
+		</if>
+		<if test="checkquarter != '' and checkquarter != null">
+			and <![CDATA[pc.checkquarter=#{checkquarter}]]>
+		</if>) as selfscore,
+		   (select round(avg(pc.score),2) from performancecheck pc where ((pc.officeid=a.id or pc.officeid in(select sof.id from sys_office sof where instr(sof.parent_ids,a.id)>0))) and pc.del_flag='0' and (pc.category='' or pc.category is null)
+		<if test="checkyear != '' and checkyear != null">
+			and <![CDATA[checkyear=#{checkyear}]]>
+		</if>
+		<if test="checkquarter != '' and checkquarter != null">
+			and <![CDATA[pc.checkquarter=#{checkquarter}]]>
+		</if>) as score
+	  FROM sys_office a
+	  LEFT JOIN sys_office p
+		ON p.id = a.parent_id
+	 WHERE a.del_flag = '0'
+	<choose>
+		<when test="orderBy != null and orderBy != ''">
+			ORDER BY ${orderBy}
+		</when>
+		<otherwise>
+			ORDER BY a.grade asc, a.create_date asc
+		</otherwise>
+	</choose>
+	</select>
+</mapper>

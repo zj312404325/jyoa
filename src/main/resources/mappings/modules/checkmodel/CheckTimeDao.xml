@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.checkmodel.dao.CheckTimeDao">
+    
+	<sql id="checkTimeColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.checkyear AS "checkYear",
+		a.checkquarter AS "checkQuarter",
+		a.startdate AS "startDate",
+		a.enddate AS "enddate",
+		a.createusername AS "createusername",
+		a.updateusername AS "updateusername"
+	</sql>
+	
+	<sql id="checkTimeJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="CheckTime" >
+		SELECT 
+			<include refid="checkTimeColumns"/>
+		FROM checktime a
+		<include refid="checkTimeJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CheckTime" >
+		SELECT 
+			<include refid="checkTimeColumns"/>
+		FROM checktime a
+		<include refid="checkTimeJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL} 
+			<if test="startDate != null and startDate != ''">
+				and <![CDATA[(a.startdate<=#{startDate,jdbcType=DATE} and a.enddate>=#{startDate,jdbcType=DATE})]]>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="CheckTime" >
+		SELECT 
+			<include refid="checkTimeColumns"/>
+		FROM checktime a
+		<include refid="checkTimeJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO checktime(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			checkyear,
+			checkquarter,
+			startdate,
+			enddate,
+			createusername,
+			updateusername
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{checkYear},
+			#{checkQuarter},
+			#{startDate},
+			#{enddate},
+			#{createusername},
+			#{updateusername}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE checktime SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			checkyear = #{checkYear},
+			checkquarter = #{checkQuarter},
+			startdate = #{startDate},
+			enddate = #{enddate},
+			createusername = #{createusername},
+			updateusername = #{updateusername}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM checktime
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE checktime SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="CheckTime" statementType="STATEMENT">
+		select * FROM checktime  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.leipiflow.dao.LeipiRunDao">
+    
+	<sql id="leipiRunColumns">
+		a.id AS "id",
+		a.pid AS "pid",
+		a.pid_flow_step AS "pidFlowStep",
+		a.cache_run_id AS "cacheRunId",
+		a.upid AS "upid",
+		a.flow_id AS "flowId",
+		a.cat_id AS "catId",
+		a.run_name AS "runName",
+		a.run_flow_id AS "runFlowId",
+		a.run_flow_process AS "runFlowProcess",
+		a.att_ids AS "attIds",
+		a.endtime AS "endtime",
+		a.status AS "status",
+		a.is_del AS "isdel",
+		a.updatetime AS "updatetime",
+		a.dateline AS "dateline"
+	</sql>
+	
+	<sql id="leipiRunJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="LeipiRun" >
+		SELECT 
+			<include refid="leipiRunColumns"/>
+		FROM leipi_run a
+		<include refid="leipiRunJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="LeipiRun" >
+		SELECT 
+			<include refid="leipiRunColumns"/>
+		FROM leipi_run a
+		<include refid="leipiRunJoins"/>
+		<where>
+			1=1
+			 <if test="flowId != null and flowId != ''">
+				AND a.flow_id=#{flowId} 
+			</if>
+			<if test="status != null">
+				AND a.status=#{status} 
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="LeipiRun" >
+		SELECT 
+			<include refid="leipiRunColumns"/>
+		FROM leipi_run a
+		<include refid="leipiRunJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO leipi_run(
+			id,
+			pid,
+			pid_flow_step,
+			cache_run_id,
+			upid,
+			flow_id,
+			cat_id,
+			run_name,
+			run_flow_id,
+			run_flow_process,
+			att_ids,
+			endtime,
+			status,
+			is_del,
+			updatetime,
+			dateline
+		) VALUES (
+			#{id},
+			#{pid},
+			#{pidFlowStep},
+			#{cacheRunId},
+			#{upid},
+			#{flowId},
+			#{catId},
+			#{runName},
+			#{runFlowId},
+			#{runFlowProcess},
+			#{attIds},
+			#{endtime},
+			#{status},
+			#{isdel},
+			#{updatetime},
+			#{dateline}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE leipi_run SET 	
+			cache_run_id = #{cacheRunId},
+			upid = #{upid},
+			flow_id = #{flowId},
+			run_name = #{runName},
+			run_flow_id = #{runFlowId},
+			run_flow_process = #{runFlowProcess},
+			att_ids = #{attIds},
+			endtime = #{endtime},
+			status = #{status},
+			is_del = #{isdel},
+			updatetime = #{updatetime},
+			dateline = #{dateline}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM leipi_run
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE leipi_run SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="LeipiRun" statementType="STATEMENT">
+		select * FROM leipi_run  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

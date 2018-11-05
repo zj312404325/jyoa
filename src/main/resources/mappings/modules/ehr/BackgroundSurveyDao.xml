@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.ehr.dao.BackgroundSurveyDao">
+    
+	<sql id="backgroundSurveyColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.surveyname AS "surveyname",
+		a.age AS "age",
+		a.sex AS "sex",
+		a.depart AS "depart",
+		a.position AS "position",
+		a.entrydate AS "entrydate",
+		a.surveydate AS "surveydate",
+		a.operater AS "operater",
+		a.surveyresult AS "surveyresult",
+		a.hradvice AS "hradvice",
+		a.surveyfiles AS "surveyfiles"
+	</sql>
+	
+	<sql id="backgroundSurveyJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="BackgroundSurvey" >
+		SELECT 
+			<include refid="backgroundSurveyColumns"/>
+		FROM backgroundsurvey a
+		<include refid="backgroundSurveyJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="BackgroundSurvey" >
+		SELECT 
+			<include refid="backgroundSurveyColumns"/>
+		FROM backgroundsurvey a
+		<include refid="backgroundSurveyJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="surveyname != null and surveyname != ''">
+				AND a.surveyname LIKE 
+					<if test="dbName == 'oracle'">'%'||#{surveyname}||'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{surveyname}, '%')</if>
+			</if>
+			<if test="operater != null and operater != ''">
+				AND a.operater LIKE 
+					<if test="dbName == 'oracle'">'%'||#{operater}||'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{operater}, '%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="BackgroundSurvey" >
+		SELECT 
+			<include refid="backgroundSurveyColumns"/>
+		FROM backgroundsurvey a
+		<include refid="backgroundSurveyJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO backgroundsurvey(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			surveyname,
+			age,
+			sex,
+			depart,
+			position,
+			entrydate,
+			surveydate,
+			operater,
+			surveyresult,
+			hradvice,
+			surveyfiles
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{surveyname},
+			#{age},
+			#{sex},
+			#{depart},
+			#{position},
+			#{entrydate},
+			#{surveydate},
+			#{operater},
+			#{surveyresult},
+			#{hradvice},
+			#{surveyfiles}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE backgroundsurvey SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			surveyname = #{surveyname},
+			age = #{age},
+			sex = #{sex},
+			depart = #{depart},
+			position = #{position},
+			entrydate = #{entrydate},
+			surveydate = #{surveydate},
+			operater = #{operater},
+			surveyresult = #{surveyresult},
+			hradvice = #{hradvice},
+			surveyfiles = #{surveyfiles}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM backgroundsurvey
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE backgroundsurvey SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="BackgroundSurvey" statementType="STATEMENT">
+		select * FROM backgroundsurvey  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

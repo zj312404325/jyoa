@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.ehr.dao.PosttrainDao">
+    
+	<sql id="posttrainColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.depart AS "depart",
+		a.office AS "office",
+		a.company AS "company",
+		a.trainer AS "trainer",
+		a.title AS "title",
+		a.address AS "address",
+		a.organizer AS "organizer",
+		a.traintime AS "traintime",
+		a.content AS "content",
+		a.summary AS "summary",
+		a.trainplan AS "trainplan"
+	</sql>
+	
+	<sql id="posttrainJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="Posttrain" >
+		SELECT 
+			<include refid="posttrainColumns"/>
+		FROM posttrain a
+		<include refid="posttrainJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Posttrain" >
+		SELECT 
+			<include refid="posttrainColumns"/>
+		FROM posttrain a
+		<include refid="posttrainJoins"/>
+		where
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="depart != null and depart != ''">
+				AND a.depart = #{depart} 
+			</if>
+			<if test="office != null and office != ''">
+				AND a.office = #{office} 
+			</if>
+			<if test="createBy != null and createBy.id != ''">
+				AND a.create_by=#{createBy.id} 
+			</if>
+			<if test="trainer != null and trainer != ''">
+				AND a.trainer LIKE 
+					<if test="dbName == 'oracle'">'%'||#{trainer}||'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{trainer}, '%')</if>
+			</if>
+			<if test="address != null and address != ''">
+				AND a.address LIKE 
+					<if test="dbName == 'oracle'">'%'||#{address}||'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{address}, '%')</if>
+			</if>
+			<if test="organizer != null and organizer != ''">
+				AND a.organizer LIKE 
+					<if test="dbName == 'oracle'">'%'||#{organizer}||'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{organizer}, '%')</if>
+			</if>
+			<if test="traintime != null and traintime != ''">
+				AND a.traintime=#{traintime} 
+			</if>
+			<if test="trainplan != null and trainplan != ''">
+				AND a.trainplan=#{trainplan}
+			</if>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Posttrain" >
+		SELECT 
+			<include refid="posttrainColumns"/>
+		FROM posttrain a
+		<include refid="posttrainJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO posttrain(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			depart,
+			office,
+			company,
+			trainer,
+			title,
+			address,
+			organizer,
+			traintime,
+			content,
+			summary,
+			trainplan
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{depart},
+			#{office},
+			#{company},
+			#{trainer},
+			#{title},
+			#{address},
+			#{organizer},
+			#{traintime},
+			#{content},
+			#{summary},
+			#{trainplan}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE posttrain SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			depart = #{depart},
+			office = #{office},
+			company = #{company},
+			trainer = #{trainer},
+			title = #{title},
+			address = #{address},
+			organizer = #{organizer},
+			traintime = #{traintime},
+			content = #{content},
+			summary = #{summary},
+			trainplan = #{trainplan}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM posttrain
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE posttrain SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="Posttrain" statementType="STATEMENT">
+		select * FROM posttrain  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.filemanagement.dao.CustomerContactDao">
+    
+	<sql id="customerContactColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.realname AS "realname",
+		a.dept AS "dept",
+		a.mobile AS "mobile",
+		a.phone AS "phone",
+		a.fax AS "fax",
+		a.email AS "email",
+		a.remark AS "remark",
+		a.customer AS "customer.id",
+		a.sortno AS "sortno"
+	</sql>
+	
+	<sql id="customerContactJoins">
+		LEFT JOIN customer b ON b.id = a.customer
+	</sql>
+	
+    
+	<select id="get" resultType="CustomerContact" >
+		SELECT 
+			<include refid="customerContactColumns"/>
+		FROM customercontact a
+		<include refid="customerContactJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CustomerContact" >
+		SELECT 
+			<include refid="customerContactColumns"/>
+		FROM customercontact a
+		<include refid="customerContactJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="customer != null and customer.id != null and customer.id != ''">
+				AND a.customer = #{customer.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="CustomerContact" >
+		SELECT 
+			<include refid="customerContactColumns"/>
+		FROM customercontact a
+		<include refid="customerContactJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO customercontact(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			realname,
+			dept,
+			mobile,
+			phone,
+			fax,
+			email,
+			remark,
+			customer,
+			sortno
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{realname},
+			#{dept},
+			#{mobile},
+			#{phone},
+			#{fax},
+			#{email},
+			#{remark},
+			#{customer.id},
+			#{sortno}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE customercontact SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			realname = #{realname},
+			dept = #{dept},
+			mobile = #{mobile},
+			phone = #{phone},
+			fax = #{fax},
+			email = #{email},
+			remark = #{remark},
+			customer = #{customer.id},
+			sortno = #{sortno}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM customercontact
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE customer = #{customer.id}
+			</otherwise>
+		</choose>
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE customercontact SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE customer = #{customer.id}
+			</otherwise>
+		</choose>
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="CustomerContact" statementType="STATEMENT">
+		select * FROM customercontact  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

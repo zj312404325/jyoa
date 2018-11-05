@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.filemanagement.dao.CustomerDao">
+    
+	<sql id="customerColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.customername AS "customername",
+		a.customerno AS "customerno",
+		a.industry AS "industry",
+		a.customerclassid AS "customerclassid",
+		a.customerclass AS "customerclass",
+		a.country AS "country",
+		a.province AS "province",
+		a.city AS "city",
+		a.customerlevelid AS "customerlevelid",
+		a.customerlevel AS "customerlevel",
+		a.creditlevelid AS "creditlevelid",
+		a.creditlevel AS "creditlevel",
+		a.address AS "address",
+		a.zipcode AS "zipcode",
+		a.companyurl AS "companyurl",
+		a.contact AS "contact",
+		a.phone AS "phone",
+		a.position AS "position",
+		a.mobile AS "mobile",
+		a.fax AS "fax",
+		a.email AS "email",
+		a.qqmsn AS "qqmsn",
+		a.legal AS "legal",
+		a.registeredcapital AS "registeredcapital",
+		a.currencyid AS "currencyid",
+		a.currency AS "currency",
+		a.paidincapital AS "paidincapital",
+		a.companyclassid AS "companyclassid",
+		a.companyclass AS "companyclass",
+		a.residence AS "residence",
+		a.setuptime AS "setuptime",
+		a.businessscope AS "businessscope",
+		a.businesssdeadline AS "businesssdeadline",
+		a.remark1 AS "remark1",
+		a.remark2 AS "remark2",
+		a.responsibleperson AS "responsibleperson",
+		a.responsiblepersonid AS "responsiblepersonid",
+		a.invoicename AS "invoicename",
+		a.invoicetaxno AS "invoicetaxno",
+		a.invoiceaddress AS "invoiceaddress",
+		a.invoicemobile AS "invoicemobile",
+		a.bank AS "bank",
+		a.bankno AS "bankno",
+		a.usertype AS "usertype",
+		a.status AS "status",
+		a.receiveuserids AS "receiveuserids",
+		a.receiveusernames AS "receiveusernames"
+	</sql>
+	
+	<sql id="customerJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="Customer" >
+		SELECT 
+			<include refid="customerColumns"/>
+		FROM customer a
+		<include refid="customerJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Customer" >
+		SELECT 
+			<include refid="customerColumns"/>
+		FROM customer a
+		<include refid="customerJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="usertype != null">
+				AND a.usertype = #{usertype}
+			</if>
+			<if test="customername != null and customername != ''">
+				AND a.customername LIKE 
+						<if test="dbName == 'oracle'">'%'||#{customername}||'%'</if>
+						<if test="dbName == 'mysql'">CONCAT('%', #{customername}, '%')</if>
+			</if>
+			<if test="customerno != null and customerno != ''">
+				AND a.customerno LIKE 
+						<if test="dbName == 'oracle'">'%'||#{customerno}||'%'</if>
+						<if test="dbName == 'mysql'">CONCAT('%', #{customerno}, '%')</if>
+			</if>
+			<if test="customerclassid != null and customerclassid != ''">
+				AND a.customerclassid = #{customerclassid}
+			</if>
+			<if test="startdate != null and startdate != ''">
+				AND <![CDATA[to_char(a.create_date,'yyyy-mm-dd')>=to_char(#{startdate},'yyyy-mm-dd') ]]>   
+			</if>
+			<if test="enddate != null and enddate != ''">
+				AND <![CDATA[to_char(a.create_date,'yyyy-mm-dd')<=to_char(#{enddate},'yyyy-mm-dd') ]]>
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+                AND (a.create_by = #{createBy.id}
+                OR a.receiveuserids like '%'||#{createBy.id}||'%')
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Customer" >
+		SELECT 
+			<include refid="customerColumns"/>
+		FROM customer a
+		<include refid="customerJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO customer(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			customername,
+			customerno,
+			industry,
+			customerclassid,
+			customerclass,
+			country,
+			province,
+			city,
+			customerlevelid,
+			customerlevel,
+			creditlevelid,
+			creditlevel,
+			address,
+			zipcode,
+			companyurl,
+			contact,
+			phone,
+			position,
+			mobile,
+			fax,
+			email,
+			qqmsn,
+			legal,
+			registeredcapital,
+			currencyid,
+			currency,
+			paidincapital,
+			companyclassid,
+			companyclass,
+			residence,
+			setuptime,
+			businessscope,
+			businesssdeadline,
+			remark1,
+			remark2,
+			responsibleperson,
+			responsiblepersonid,
+			invoicename,
+			invoicetaxno,
+			invoiceaddress,
+			invoicemobile,
+			bank,
+			bankno,
+			usertype,
+			status,
+			receiveuserids,
+		    receiveusernames
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{customername},
+			#{customerno},
+			#{industry},
+			#{customerclassid},
+			#{customerclass},
+			#{country},
+			#{province},
+			#{city},
+			#{customerlevelid},
+			#{customerlevel},
+			#{creditlevelid},
+			#{creditlevel},
+			#{address},
+			#{zipcode},
+			#{companyurl},
+			#{contact},
+			#{phone},
+			#{position},
+			#{mobile},
+			#{fax},
+			#{email},
+			#{qqmsn},
+			#{legal},
+			#{registeredcapital},
+			#{currencyid},
+			#{currency},
+			#{paidincapital},
+			#{companyclassid},
+			#{companyclass},
+			#{residence},
+			#{setuptime},
+			#{businessscope},
+			#{businesssdeadline},
+			#{remark1},
+			#{remark2},
+			#{responsibleperson},
+			#{responsiblepersonid},
+			#{invoicename},
+			#{invoicetaxno},
+			#{invoiceaddress},
+			#{invoicemobile},
+			#{bank},
+			#{bankno},
+			#{usertype},
+			#{status},
+			#{receiveuserids},
+		    #{receiveusernames}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE customer SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			customername = #{customername},
+			customerno = #{customerno},
+			industry = #{industry},
+			customerclassid = #{customerclassid},
+			customerclass = #{customerclass},
+			country = #{country},
+			province = #{province},
+			city = #{city},
+			customerlevelid = #{customerlevelid},
+			customerlevel = #{customerlevel},
+			creditlevelid = #{creditlevelid},
+			creditlevel = #{creditlevel},
+			address = #{address},
+			zipcode = #{zipcode},
+			companyurl = #{companyurl},
+			contact = #{contact},
+			phone = #{phone},
+			position = #{position},
+			mobile = #{mobile},
+			fax = #{fax},
+			email = #{email},
+			qqmsn = #{qqmsn},
+			legal = #{legal},
+			registeredcapital = #{registeredcapital},
+			currencyid = #{currencyid},
+			currency = #{currency},
+			paidincapital = #{paidincapital},
+			companyclassid = #{companyclassid},
+			companyclass = #{companyclass},
+			residence = #{residence},
+			setuptime = #{setuptime},
+			businessscope = #{businessscope},
+			businesssdeadline = #{businesssdeadline},
+			remark1 = #{remark1},
+			remark2 = #{remark2},
+			responsibleperson = #{responsibleperson},
+			responsiblepersonid = #{responsiblepersonid},
+			invoicename = #{invoicename},
+			invoicetaxno = #{invoicetaxno},
+			invoiceaddress = #{invoiceaddress},
+			invoicemobile = #{invoicemobile},
+			bank = #{bank},
+			bankno = #{bankno},
+			usertype = #{usertype},
+			status = #{status},
+			receiveuserids=#{receiveuserids},
+		    receiveusernames=#{receiveusernames}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM customer
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE customer SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="Customer" statementType="STATEMENT">
+		select * FROM customer  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

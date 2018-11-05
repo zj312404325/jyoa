@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.ehr.dao.QuestionSurveyDao">
+    
+	<sql id="questionSurveyColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.username AS "username",
+		a.officename AS "officename",
+		a.post AS "post",
+		a.entrytime AS "entrytime",
+		a.internalreason AS "internalreason",
+		a.externalreason AS "externalreason",
+		a.improve AS "improve",
+		a.statisfaction AS "statisfaction",
+		a.price AS "price",
+		a.improvestay AS "improvestay"
+	</sql>
+	
+	<sql id="questionSurveyJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="QuestionSurvey" >
+		SELECT 
+			<include refid="questionSurveyColumns"/>
+		FROM questionsurvey a
+		<include refid="questionSurveyJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="QuestionSurvey" >
+		SELECT 
+			<include refid="questionSurveyColumns"/>
+		FROM questionsurvey a
+		<include refid="questionSurveyJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL} 
+			<if test="createBy != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+			<if test="username != null and username != ''">
+				AND a.username = #{username}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="QuestionSurvey" >
+		SELECT 
+			<include refid="questionSurveyColumns"/>
+		FROM questionsurvey a
+		<include refid="questionSurveyJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO questionsurvey(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			username,
+			officename,
+			post,
+			entrytime,
+			internalreason,
+			externalreason,
+			improve,
+			statisfaction,
+			price,
+			improvestay
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{username},
+			#{officename},
+			#{post},
+			#{entrytime},
+			#{internalreason},
+			#{externalreason},
+			#{improve},
+			#{statisfaction},
+			#{price},
+			#{improvestay}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE questionsurvey SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			username = #{username},
+			officename = #{officename},
+			post = #{post},
+			entrytime = #{entrytime},
+			internalreason = #{internalreason},
+			externalreason = #{externalreason},
+			improve = #{improve},
+			statisfaction = #{statisfaction},
+			price = #{price},
+			improvestay = #{improvestay}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM questionsurvey
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE questionsurvey SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="QuestionSurvey" statementType="STATEMENT">
+		select * FROM questionsurvey  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

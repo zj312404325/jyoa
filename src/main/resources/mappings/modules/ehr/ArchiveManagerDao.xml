@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.ehr.dao.ArchiveManagerDao">
+    
+	<sql id="archiveManagerColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.topparentid AS "topparentid",
+		a.parent_id AS "parent.id",
+		a.parent_ids AS "parentIds",
+		a.name AS "name",
+		a.sort AS "sort"
+	</sql>
+	
+	<sql id="archiveManagerJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="ArchiveManager" >
+		SELECT 
+			<include refid="archiveManagerColumns"/>
+		FROM archivemanager a
+		<include refid="archiveManagerJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="ArchiveManager" >
+		SELECT 
+			<include refid="archiveManagerColumns"/>
+		FROM archivemanager a
+		<include refid="archiveManagerJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				and a.create_by = #{createBy.id}
+			</if>
+			<!-- 数据范围过滤 -->
+			${sqlMap.dsf}
+			<!-- OR a.id = #{currentUser.office.id} -->
+			OR a.topparentid = #{topparentid}
+			OR a.id = #{topparentid}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.sort asc,a.create_date
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findListByArchiveManager" resultType="ArchiveManager" >
+		SELECT 
+			<include refid="archiveManagerColumns"/>
+		FROM archivemanager a
+		<include refid="archiveManagerJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="parent != null and parent.id != null">
+				and a.parent_id = #{parent.id}
+			</if>
+			<if test="parentIds != null and parentIds != ''">
+				AND a.parent_ids LIKE 
+					<if test="dbName == 'oracle'">'%'||#{parentIds}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{parentIds}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{parentIds},'%')</if>
+			</if>
+			<if test="isCurrentMonth != null and isCurrentMonth != ''">
+				<if test="dbName == 'oracle'">and to_char(sysdate,'yyyy-mm')=to_char(a.create_date,'yyyy-mm')</if>
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				and a.create_by = #{createBy.id}
+			</if>
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="ArchiveManager" >
+		SELECT 
+			<include refid="archiveManagerColumns"/>
+		FROM archivemanager a
+		<include refid="archiveManagerJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO archivemanager(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			topparentid,
+			parent_id,
+			parent_ids,
+			name,
+			sort
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{topparentid},
+			#{parent.id},
+			#{parentIds},
+			#{name},
+			#{sort}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE archivemanager SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			topparentid = #{topparentid},
+			parent_id = #{parent.id},
+			parent_ids = #{parentIds},
+			name = #{name},
+			sort = #{sort}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM archivemanager
+		WHERE id = #{id} OR parent_ids LIKE 
+					<if test="dbName == 'oracle'">'%,'||#{id}||',%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%,', #{id}, ',%')</if>
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE archivemanager SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="ArchiveManager" statementType="STATEMENT">
+		select * FROM archivemanager  where ${propertyName} = '${value}'
+	</select>
+	
+	<select id="findByParentIdsLike" resultType="Office">
+		SELECT
+			<include refid="archiveManagerColumns"/>
+		FROM archivemanager a
+		<include refid="archiveManagerJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<if test="parentIds != '' and parentIds != null">
+		 AND a.parent_ids LIKE 
+		<if test="dbName == 'oracle'">'%'||#{parentIds}||'%'</if>
+		<if test="dbName == 'mysql'">CONCAT('%', #{parentIds}, '%')</if>
+		and a.parent_ids != #{parentIds}
+		</if>
+		ORDER BY a.create_date asc
+		<!-- ORDER BY a.code -->
+	</select>
+	
+	<update id="updateParentIds">
+		UPDATE archivemanager SET 
+			parent_id = #{parent.id}, 
+			parent_ids = #{parentIds}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 查询当前目录及其子目录 -->
+	<select id="findCurrentAndChildCategory" resultType="ArchiveManager">
+		select * from archivemanager t where t.parent_ids like '%'||#{id}||'%' or t.id=#{id}
+	</select>
+</mapper>

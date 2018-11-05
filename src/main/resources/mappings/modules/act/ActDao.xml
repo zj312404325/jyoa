@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.act.dao.ActDao">
+    
+	<update id="updateProcInsIdByBusinessId">
+		UPDATE ${businessTable} SET 
+			proc_ins_id = #{procInsId}
+		WHERE id = #{businessId}
+	</update>
+	
+	<!-- <select id="findProcessInstList" resultType="java.util.Map" parameterType="java.util.Map">
+	select t.*,rownum from (select a.EXECUTION_ID_ as executionId, p.START_TIME_ as starttime,p.PROC_INST_ID_ as processInstanceId,p.PROC_DEF_ID_ as processDefinitionId,a.name_ as taskName,a.id_ as taskId,a.task_def_key_ as taskDefKey,p.start_user_id_ as applyUserId from act_hi_procinst p 
+			left join act_hi_taskinst a on(p.PROC_INST_ID_=a.PROC_INST_ID_) 
+			<if test="procDefKey!=null and procDefKey!=''">
+	       	    left join act_re_procdef d on (p.PROC_DEF_ID_=d.id_)  
+	       </if>
+			where 1=1  and 
+			a.START_TIME_=(select max(c.START_TIME_) START_TIME_ FROM act_hi_taskinst c where c.PROC_INST_ID_=p.PROC_INST_ID_ )
+            <if test="processInstanceId!=null and processInstanceId!=''">
+	       	   and p.PROC_INST_ID_='${processInstanceId}' 
+	       </if>
+	       <if test="startuserid!=null and startuserid!=''">
+	       	   and p.start_user_id_='${startuserid}' 
+	       </if>
+	       <if test="procDefKey!=null and procDefKey!=''">
+	       	    and d.key_='${procDefKey}' 
+	       </if>
+	       <if test="agotime!=null and agotime!=''">
+	         <![CDATA[ 
+	       	   and p.START_TIME_ >= to_timestamp('${agotime}', 'yyyy-mm-dd hh24:mi:ss.ff')
+	       	 ]]>
+	       </if>
+	       <if test="futuretime!=null and futuretime!=''">
+	         <![CDATA[ 
+	       	   and p.START_TIME_ <= to_timestamp('${futuretime}', 'yyyy-mm-dd hh24:mi:ss.ff')
+	       	 ]]>
+	       </if>
+	        ORDER BY p.start_time_ desc) t <![CDATA[where rownum >${pageStart}*${pageEnd} and rownum<=${pageStart+1}*${pageEnd}]]>
+    </select> -->
+    
+    <select id="findProcessInstList" resultType="java.util.Map" parameterType="java.util.Map">
+	select * from (select k.*,rownum num from (select t.*,rownum from (select b.EXECUTION_ID_ as executionId, p.START_TIME_ as starttime,p.PROC_INST_ID_ as processInstanceId,p.PROC_DEF_ID_ as processDefinitionId,b.act_name_ as taskName,b.task_id_ as taskId,f.task_def_key_ as taskDefKey,g.name as applyUserId,p.delete_reason_ as deleteReason, p.END_TIME_ as endtime from act_hi_procinst p 
+			left join (select *
+                      from (select row_number() over(partition by m.PROC_INST_ID_ order by m.start_time_ desc) rn,
+                                   m.*
+                              from act_hi_actinst m where (m.end_time_ is null or m.act_type_='endEvent') order by m.start_time_ desc) t
+                     where t.rn = 1) b on (p.PROC_INST_ID_ = b.PROC_INST_ID_) left join act_hi_taskinst f on(b.task_id_=f.id_) left join sys_user g on(p.start_user_id_=g.login_name) 
+			<!-- <if test="procDefKey!=null and procDefKey!=''">
+	       	    left join act_re_procdef d on (p.PROC_DEF_ID_=d.id_)  
+	       </if> -->
+			where 1=1 
+            <if test="processInstanceId!=null and processInstanceId!=''">
+	       	   and p.PROC_INST_ID_='${processInstanceId}' 
+	       </if>
+	       <if test="startuserid!=null and startuserid!=''">
+	       	   and p.start_user_id_='${startuserid}' 
+	       </if>
+	       <!-- <if test="procDefKey!=null and procDefKey!=''">
+	       	    and d.key_='${procDefKey}' 
+	       </if> -->
+	       <if test="procDefKey!=null and procDefKey!='' and procDefKey==0">
+	       	    and p.end_time_ is null and p.delete_reason_ is null  
+	       </if>
+	       <if test="procDefKey!=null and procDefKey!='' and procDefKey==1">
+	       	    and p.end_time_ is not null and p.delete_reason_ is not null 
+	       </if>
+	       <if test="procDefKey!=null and procDefKey!='' and procDefKey==2">
+	       	    and p.end_time_ is not null and p.delete_reason_ is null 
+	       </if>
+	       <if test="agotime!=null and agotime!=''">
+	         <![CDATA[ 
+	       	   and p.START_TIME_ >= to_timestamp('${agotime}', 'yyyy-mm-dd hh24:mi:ss.ff')
+	       	 ]]>
+	       </if>
+	       <if test="futuretime!=null and futuretime!=''">
+	         <![CDATA[ 
+	       	   and p.START_TIME_ <= to_timestamp('${futuretime}', 'yyyy-mm-dd hh24:mi:ss.ff')
+	       	 ]]>
+	       </if>
+	        ORDER BY p.start_time_ desc) t) k) <![CDATA[where num between ${pageStart} and ${pageEnd}]]>
+    </select>
+	
+	<select id="findProcessInstCount" resultType="java.lang.Integer" parameterType="java.util.Map">
+            select count(1) from act_hi_procinst p 
+            <if test="procDefKey!=null and procDefKey!=''">
+	       	    left join act_re_procdef d on (p.PROC_DEF_ID_=d.id_)  
+	       </if>
+             where 1 = 1 
+             <if test="processInstanceId!=null and processInstanceId!=''">
+	       	   and p.PROC_INST_ID_='${processInstanceId}' 
+	       </if>
+	       <if test="procDefKey!=null and procDefKey!=''">
+	       	    and d.key_='${procDefKey}' 
+	       </if>
+	       <if test="startuserid!=null and startuserid!=''">
+	       	   and p.start_user_id_='${startuserid}' 
+	       </if>
+	       <if test="agotime!=null and agotime!=''">
+	         <![CDATA[ 
+	       	   and p.START_TIME_ >= to_timestamp('${agotime}', 'yyyy-mm-dd hh24:mi:ss.ff')
+	       	 ]]>
+	       </if>
+	       <if test="futuretime!=null and futuretime!=''">
+	         <![CDATA[ 
+	       	   and p.START_TIME_ <= to_timestamp('${futuretime}', 'yyyy-mm-dd hh24:mi:ss.ff')
+	       	 ]]>
+	       </if>
+    </select>
+	
+	<update id="updateHiTask" parameterType="java.util.Map" statementType="STATEMENT">
+		UPDATE act_hi_taskinst SET 
+			ASSIGNEE_ = '${agent}'
+		WHERE ID_ in(${ids})
+	</update>
+	
+	<update id="updateRunTask" parameterType="java.util.Map">
+		UPDATE act_ru_task SET 
+			ASSIGNEE_ = #{agent}
+			<if test="createby!=null and createby!=''">
+	       	   ,createby=#{createby} 
+	       </if>
+		WHERE ASSIGNEE_=#{assignee}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取记录 -->
+	<select id="findByPropertyMap" resultType="java.util.Map" statementType="STATEMENT">
+		select * FROM act_ru_task  where ${propertyName} = '${value}' 
+	</select>
+	
+	<!-- 根据实体名称和字段名称和字段值获取记录 -->
+	<select id="findNextAssignee" resultType="java.util.Map">
+		select * FROM act_ru_task  where PROC_INST_ID_ = #{procid}
+	</select>
+	
+	<update id="updateActTask" parameterType="java.util.Map" statementType="STATEMENT">
+		UPDATE act_hi_actinst SET 
+			ASSIGNEE_ = '${agent}'
+		WHERE TASK_ID_ in(${ids})
+	</update>
+	
+	<select id="findActByMap" resultType="java.util.Map" parameterType="java.util.Map" statementType="STATEMENT">
+		select * FROM act_ru_task  where ASSIGNEE_ = '${assignee}' 
+		<!-- <if test="createby!=null and createby!=''">
+	       	   and createby='${createby}' 
+	       </if> -->
+	</select>
+	
+	<select id="findCandidate" resultType="java.util.Map" parameterType="java.util.Map" statementType="STATEMENT">
+		select a.user_id_ as USER_ID_,t.assignee_ as ASSIGNEE_ FROM act_hi_actinst t left join act_ru_identitylink a on(t.task_id_=a.task_id_) where t.task_id_ is not null and t.end_time_ is null and t.proc_inst_id_='${procid}' and a.agentcreateby is null
+		<if test="createby!=null and createby!=''">
+	       	   and createby='${createby}' 
+	       </if>
+	</select>
+	
+	<insert id="saveIdentitylink" parameterType="java.util.Map">
+		insert into act_ru_identitylink (select sys_guid(),rev_,group_id_,type_,'${agent}',task_id_,proc_inst_id_,proc_def_id_,'${agented}',isagent from act_ru_identitylink where user_id_='${agented}' and isagent is null)
+	</insert>
+	
+	<update id="updateIdentitylink" parameterType="java.util.Map">
+		UPDATE act_ru_identitylink SET 
+			isagent = 1
+		WHERE user_id_='${agented}'
+	</update>
+	
+	<update id="updateIdentitylinkForAgent" parameterType="java.util.Map">
+		UPDATE act_ru_identitylink SET 
+			user_id_ = '${userid}' <if test="isagent!=null and isagent!=''">
+	       	   ,isagent=null
+	       </if>
+		WHERE 1=1 
+		<if test="agentcreateby!=null and agentcreateby!=''">
+	       	   and agentcreateby='${agentcreateby}'
+	       </if> 
+	</update>
+	
+	<update id="deleteIdentitylinkForAgent">
+		DELETE FROM act_ru_identitylink
+		WHERE  
+		<if test="agentcreateby!=null and agentcreateby!=''">
+	       	   agentcreateby='${agentcreateby}'
+	       </if>
+	</update>
+	
+	<update id="updateIdentitylinkForDel" parameterType="java.util.Map">
+		UPDATE act_ru_identitylink SET 
+			isagent=null
+		WHERE 1=1 
+		<if test="userid!=null and userid!=''">
+	       	   and user_id_='${userid}' and isagent=1
+	       </if> 
+	</update>
+	
+	<select id="findAgented" resultType="java.util.Map" parameterType="java.util.Map" statementType="STATEMENT">
+		select * from act_ru_identitylink t where user_id_='${userid}' and task_id_='${taskid}' and agentcreateby is not null
+	</select>
+	
+	<!-- <insert id="saveHiAct" parameterType="java.util.Map">
+		insert into act_hi_actinst (select sys_guid(),proc_def_id_,proc_inst_id_,execution_id_,act_id_,task_id_,call_proc_inst_id_,act_name_,act_type_,'${agentedname}',start_time_,end_time_,duration_,tenant_id_,1 from act_hi_actinst where proc_inst_id_='${procid}' and task_id_='${taskid}' and end_time_ is not null)
+	</insert> -->
+	
+	<insert id="saveHiAct" parameterType="java.util.Map">
+		insert into act_hi_actinst (select sys_guid(),proc_def_id_,proc_inst_id_,execution_id_,act_id_,task_id_,call_proc_inst_id_,act_name_,act_type_,'${agentedname}',start_time_,end_time_,duration_,tenant_id_,1,null from act_hi_actinst where proc_inst_id_='${procid}' and task_id_='${taskid}')
+	</insert>
+	
+	<insert id="updateHiAct" parameterType="java.util.Map">
+		update act_hi_actinst t1
+   set (end_time_, duration_) = (select end_time_, duration_
+                                   from act_hi_actinst t2
+                                  where  t2.proc_inst_id_ = '${procid}'
+   and t2.task_id_ = '${taskid}' and duration_ is not null)
+ where t1.proc_inst_id_ = '${procid}'
+   and t1.task_id_ = '${taskid}' and duration_ is null
+	</insert>
+	
+	<select id="findHistoryFlow" resultType="java.util.Map" parameterType="java.util.Map" statementType="STATEMENT">
+		select t.* <if test="isagent==null">
+	       	    ,a.message_ as comment_,b.text_ as applyuserid,g.name as agentcreatebyUser,h.name as applyuser 
+	       </if> 
+		 FROM act_hi_actinst t <if test="isagent==null">
+	       	    left join act_hi_comment a on(t.proc_inst_id_=a.proc_inst_id_ and t.task_id_=a.task_id_) left join act_hi_varinst b on(t.proc_inst_id_=b.proc_inst_id_ and b.name_='applyUser') left join sys_user g on(t.agentcreateby=g.login_name) left join sys_user h on (t.assignee_ = h.login_name) 
+	       </if> where t.proc_inst_id_='${procid}' and (t.assignee_ is not null or t.end_time_ is not null) and (t.act_type_ not like '%Gateway')
+		<if test="isagent!=null and isagent!=''">
+	       	   and t.isagent is null 
+	       </if> 
+		order by t.start_time_ asc,t.task_id_ desc,isagent asc nulls first
+	</select>
+	
+	<update id="updateActHitory" parameterType="java.util.Map">
+		UPDATE act_hi_actinst SET 
+			agentcreateby='${agentedname}'
+		where proc_inst_id_='${procid}' and task_id_='${taskid}' and isagent is null 
+	</update>
+	
+	<select id="findProcInstMap" resultType="java.util.Map" parameterType="java.util.Map" statementType="STATEMENT">
+		select t.* 
+		 FROM act_hi_procinst t where t.proc_inst_id_='${procid}'
+	</select>
+	
+	<update id="updateActTaskForDel" parameterType="java.util.Map" statementType="STATEMENT">
+		UPDATE act_hi_actinst SET 
+			ASSIGNEE_ = null
+		WHERE ID_ in('${id}')
+	</update>
+	
+	<update id="updateHiTaskForDel" parameterType="java.util.Map" statementType="STATEMENT">
+		UPDATE act_hi_taskinst SET 
+			ASSIGNEE_ = null
+		WHERE proc_inst_id_='${procid}' and delete_reason_='撤销'
+	</update>
+	
+	<select id="findActTaskMap" resultType="java.util.Map" parameterType="java.util.Map" statementType="STATEMENT">
+		select t.* 
+		 FROM act_hi_actinst t where t.proc_inst_id_='${procid}' and end_time_ is null and assignee_ is not null
+	</select>
+	
+	<select id="findActMap" resultType="java.util.Map" parameterType="java.util.Map" statementType="STATEMENT">
+		select t.* 
+		 FROM act_hi_actinst t where t.proc_inst_id_='${procid}' 
+		 <if test="actid!=null and actid!=''"> and act_id_= '${actid}'</if>
+	</select>
+</mapper>

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.contractmanager.dao.ContractInvoiceDao">
+    
+	<sql id="contractInvoiceColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.invoicetypeid AS "invoicetypeid",
+		a.invoicetype AS "invoicetype",
+		a.money AS "money",
+		a.invoicedate AS "invoicedate",
+		a.invoiceno AS "invoiceno",
+		a.remark1 AS "remark1",
+		a.remark2 AS "remark2",
+		a.contractmanager AS "contractmanager.id"
+	</sql>
+	
+	<sql id="contractInvoiceJoins">
+		LEFT JOIN contractmanager b ON b.id = a.contractmanager
+	</sql>
+	
+    
+	<select id="get" resultType="ContractInvoice" >
+		SELECT 
+			<include refid="contractInvoiceColumns"/>
+		FROM contractinvoice a
+		<include refid="contractInvoiceJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="ContractInvoice" >
+		SELECT 
+			<include refid="contractInvoiceColumns"/>
+		FROM contractinvoice a
+		<include refid="contractInvoiceJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="contractmanager != null and contractmanager.id != null and contractmanager.id != ''">
+				AND a.contractmanager = #{contractmanager.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="ContractInvoice" >
+		SELECT 
+			<include refid="contractInvoiceColumns"/>
+		FROM contractinvoice a
+		<include refid="contractInvoiceJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO contractinvoice(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			invoicetypeid,
+			invoicetype,
+			money,
+			invoicedate,
+			invoiceno,
+			remark1,
+			remark2,
+			contractmanager
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{invoicetypeid},
+			#{invoicetype},
+			#{money},
+			#{invoicedate},
+			#{invoiceno},
+			#{remark1},
+			#{remark2},
+			#{contractmanager.id}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE contractinvoice SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			invoicetypeid = #{invoicetypeid},
+			invoicetype = #{invoicetype},
+			money = #{money},
+			invoicedate = #{invoicedate},
+			invoiceno = #{invoiceno},
+			remark1 = #{remark1},
+			remark2 = #{remark2},
+			contractmanager = #{contractmanager.id}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM contractinvoice
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE contractmanager = #{contractmanager.id}
+			</otherwise>
+		</choose>
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE contractinvoice SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE contractmanager = #{contractmanager.id}
+			</otherwise>
+		</choose>
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="ContractInvoice" statementType="STATEMENT">
+		select * FROM contractinvoice  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

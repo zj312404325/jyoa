@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.oa.dao.OagroupDao">
+    
+	<sql id="oagroupColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.groupname AS "groupname",
+		a.grouptype AS "grouptype"
+	</sql>
+	
+	<sql id="oagroupJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="Oagroup" >
+		SELECT 
+			<include refid="oagroupColumns"/>
+		FROM oagroup a
+		<include refid="oagroupJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Oagroup" >
+		SELECT 
+			<include refid="oagroupColumns"/>
+		FROM oagroup a
+		<include refid="oagroupJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			AND a.create_by=#{currentUser.id}
+			<if test="grouptype != null">
+				AND a.grouptype = #{grouptype}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Oagroup" >
+		SELECT 
+			<include refid="oagroupColumns"/>
+		FROM oagroup a
+		<include refid="oagroupJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			AND a.create_by=#{currentUser.id} 
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oagroup(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			groupname,
+			grouptype
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{groupname},
+			#{grouptype}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oagroup SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			groupname = #{groupname},
+			grouptype = #{grouptype}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM oagroup
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE oagroup SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="Oagroup" statementType="STATEMENT">
+		select * FROM oagroup  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

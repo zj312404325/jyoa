@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.reports.dao.WeeklyReportDao">
+    
+	<sql id="weeklyReportColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.officeid AS "officeid",
+		a.officename AS "officename",
+		a.stationid AS "stationid",
+		a.stationname AS "stationname",
+		a.userid AS "userid",
+		a.userno AS "userno",
+		a.username AS "username",
+		a.title AS "title",
+		a.lock_flag AS "lockFlag"
+	</sql>
+	
+	<sql id="weeklyReportJoins">
+		left join sys_office o on(a.officeid=o.id)
+	</sql>
+	
+    
+	<select id="get" resultType="WeeklyReport" >
+		SELECT 
+			<include refid="weeklyReportColumns"/>
+		FROM weeklyreport a
+		<include refid="weeklyReportJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="WeeklyReport" >
+		SELECT 
+			<include refid="weeklyReportColumns"/>
+		FROM weeklyreport a
+		<include refid="weeklyReportJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL} 
+			<if test="createBy != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+			<if test="stationIds != null">
+				AND a.officeid in (${stationIds})
+			</if>
+			<if test="startdate != null and startdate != ''">
+				AND <![CDATA[to_char(a.create_date,'yyyy-mm-dd')>=to_char(#{startdate},'yyyy-mm-dd') ]]>   
+			</if>
+			<if test="enddate != null and enddate != ''">
+				AND <![CDATA[to_char(a.create_date,'yyyy-mm-dd')<=to_char(#{enddate},'yyyy-mm-dd') ]]>
+			</if>
+			<if test="userno != null and userno != ''">
+				AND a.userno like 
+					<if test="dbName == 'oracle'">'%'||#{userno}||'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{userno}, '%')</if>
+			</if>
+			<if test="username != null and username != ''">
+				AND a.username like 
+					<if test="dbName == 'oracle'">'%'||#{username}||'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{username}, '%')</if>
+			</if>
+			<if test="sqlstr != null">
+				AND (${sqlstr})
+			</if>
+			<if test="officeid != null and officeid != ''">
+				AND (a.officeid=#{officeid} or instr(o.parent_ids,#{officeid})>0)
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="WeeklyReport" >
+		SELECT 
+			<include refid="weeklyReportColumns"/>
+		FROM weeklyreport a
+		<include refid="weeklyReportJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO weeklyreport(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			officeid,
+			officename,
+			stationid,
+			stationname,
+			userid,
+			userno,
+			username,
+			title,
+			lock_flag
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{officeid},
+			#{officename},
+			#{stationid},
+			#{stationname},
+			#{userid},
+			#{userno},
+			#{username},
+			#{title},
+			#{lockflag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE weeklyReport SET
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			officeid = #{officeid},
+			officename = #{officename},
+			stationid = #{stationid},
+			stationname = #{stationname},
+			userid = #{userid},
+			userno = #{userno},
+			username = #{username},
+			title = #{title},
+			lock_flag = #{lockflag}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM weeklyreport
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE weeklyreport SET
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="WeeklyReport" statementType="STATEMENT">
+		select * FROM weeklyreport  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

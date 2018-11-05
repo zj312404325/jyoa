@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.ehr.dao.TrainplanDao">
+    
+	<sql id="trainplanColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.userid AS "userid",
+		a.username AS "username",
+		a.officeid AS "officeid",
+		a.officename AS "officename",
+		a.traindate AS "traindate",
+		a.title AS "title",
+		a.status AS "status",
+		a.completesituation AS "completesituation",
+		a.isnotify AS "isnotify",
+		a.trainpeople AS "trainpeople"
+	</sql>
+	
+	<sql id="trainplanJoins">
+		LEFT JOIN sys_user username ON username.id = a.username
+		LEFT JOIN sys_office officename ON officename.id = a.officename
+	</sql>
+	
+    
+	<select id="get" resultType="Trainplan" >
+		SELECT 
+			<include refid="trainplanColumns"/>
+		FROM trainplan a
+		<include refid="trainplanJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Trainplan" >
+		SELECT 
+			<include refid="trainplanColumns"/>
+		FROM trainplan a
+		<include refid="trainplanJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="status != null and status != ''">
+				and a.status=#{status}
+			</if>
+			<if test="userid != null and userid != ''">
+				and a.userid=#{userid}
+			</if>
+			<if test="officeid != null and officeid != ''">
+				and a.officeid=#{officeid}
+			</if>
+			<if test="title != null and title != ''">
+				AND ( a.title like
+				<if test="dbName == 'oracle'">'%'||#{title}||'%'</if>
+				<if test="dbName == 'mysql'">CONCAT('%', #{title}, '%')</if>)
+			</if>
+			<if test="traindate != null and traindate != ''">
+				AND a.traindate=#{traindate,jdbcType=DATE}
+			</if>
+			<if test="isnotify != null and isnotify != ''">
+				AND a.isnotify=#{isnotify}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Trainplan" >
+		SELECT 
+			<include refid="trainplanColumns"/>
+		FROM trainplan a
+		<include refid="trainplanJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO trainplan(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			userid,
+			username,
+			officeid,
+			officename,
+			traindate,
+			title,
+			status,
+			completesituation,
+			isnotify,
+			trainpeople
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{userid},
+			#{username},
+			#{officeid},
+			#{officename},
+			#{traindate},
+			#{title},
+			#{status},
+			#{completesituation},
+			#{isnotify},
+			#{trainpeople}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE trainplan SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			userid = #{userid},
+			username = #{username},
+			officeid = #{officeid},
+			officename = #{officename},
+			traindate = #{traindate},
+			title = #{title},
+			status = #{status},
+			completesituation = #{completesituation},
+			isnotify = #{isnotify},
+			trainpeople = #{trainpeople}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM trainplan
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE trainplan SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="Trainplan" statementType="STATEMENT">
+		select * FROM trainplan  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

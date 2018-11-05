@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.flow.dao.FlowapplyDao">
+    
+	<sql id="flowapplyColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.templatecontentid AS "templatecontentid",
+		a.templateid AS "templateid",
+		a.flowid AS "flowid",
+		a.showcolumn AS "showcolumn",
+		a.templatehtml AS "templatehtml",
+		a.templateviewhtml AS "templateviewhtml",
+		a.process_instance_id AS "processInstanceId",
+		a.company_id AS "company.id",
+    	a.office_id AS "dept.id",
+    	a.office_true_id AS "office.id",
+    	l.status AS "applystatetype",
+    	a.pid AS "pid",
+    	u.officename AS "office.name",
+    	a.flowtype AS "flowtype",
+    	a.var1 AS "var1",
+    	a.var2 AS "var2"
+	</sql>
+	
+	<sql id="flowapplyJoins">
+	  LEFT JOIN sys_user u ON u.id = a.create_by 
+	  LEFT JOIN leipi_run l ON a.process_instance_id = l.id
+	</sql>
+
+
+	<sql id="flowapplyColumns2">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.templatecontentid AS "templatecontentid",
+		a.templateid AS "templateid",
+		a.flowid AS "flowid",
+		a.showcolumn AS "showcolumn",
+		a.process_instance_id AS "processInstanceId",
+		a.company_id AS "company.id",
+		a.office_id AS "dept.id",
+		a.office_true_id AS "office.id",
+		l.status AS "applystatetype",
+		a.pid AS "pid",
+		u.officename AS "office.name",
+		a.flowtype AS "flowtype",
+		a.var1 AS "var1",
+		a.var2 AS "var2"
+	</sql>
+	<sql id="flowapplyJoins2">
+		LEFT JOIN sys_user u ON u.id = a.create_by
+		LEFT JOIN leipi_run l ON a.process_instance_id = l.id
+		left join leipi_run_process p on p.run_flow=a.process_instance_id
+		LEFT JOIN templatedetail d ON a.id = d.flowapplyid
+	</sql>
+	
+    
+	<select id="get" resultType="Flowapply" >
+		SELECT 
+			<include refid="flowapplyColumns"/>
+		FROM flowapply a
+		<include refid="flowapplyJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Flowapply" >
+		SELECT
+			<include refid="flowapplyColumns"/>
+		FROM flowapply a
+		<include refid="flowapplyJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL} 
+			<if test="processInstanceId != null and processInstanceId != ''">
+				AND a.process_instance_id = #{processInstanceId}
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+			<if test="office != null and office.id != null and office.id != ''">
+				AND a.office_true_id = #{office.id}
+			</if>
+			<if test="dept != null and dept.id != null and dept.id != ''">
+				AND a.office_id = #{dept.id}
+			</if>
+			<if test="flowid != null and flowid != ''">
+				AND a.flowid = #{flowid}
+			</if>
+			<if test="flowtype != null">
+				AND a.flowtype = #{flowtype}
+			</if>
+			<if test="keyword != null and keyword != ''">
+				AND ((u.name like
+					<if test="dbName == 'oracle'">'%'||#{keyword}||'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{keyword}, '%')</if>
+					OR a.var1 like
+					<if test="dbName == 'oracle'">'%'||#{keyword}||'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{keyword}, '%')</if>
+				) OR (a.pid like
+				<if test="dbName == 'oracle'">'%'||#{keyword}||'%'</if>
+				<if test="dbName == 'mysql'">CONCAT('%', #{keyword}, '%')</if>) )
+			</if>
+			<if test="applystatetype != null and applystatetype != ''">
+				AND l.status = #{applystatetype}
+			</if>
+			<if test="startdate != null and startdate != ''">
+				AND <![CDATA[to_char(a.create_date,'yyyy-mm-dd')>=to_char(#{startdate},'yyyy-mm-dd') ]]>
+			</if>
+			<if test="enddate != null and enddate != ''">
+				AND <![CDATA[to_char(a.create_date,'yyyy-mm-dd')<=to_char(#{enddate},'yyyy-mm-dd') ]]>
+			</if>
+			<if test="var2 != null and var2 != ''">
+				AND (a.var2 like
+				<if test="dbName == 'oracle'">'%'||#{var2}||'%'</if>
+				<if test="dbName == 'mysql'">CONCAT('%', #{var2}, '%')</if>)
+			</if>
+			<if test="searchdays != null and searchdays != '' and searchdays != 0">
+				AND <![CDATA[to_char(a.create_date,'yyyy-mm-dd')>to_char(sysdate-#{searchdays},'yyyy-mm-dd') ]]>
+				AND <![CDATA[to_char(a.create_date,'yyyy-mm-dd')<=to_char(sysdate,'yyyy-mm-dd') ]]>
+			</if>
+			<if test="searchdatefrom != null and searchdatefrom != ''">
+				AND <![CDATA[to_char(a.create_date,'yyyy-mm-dd')>=to_char(#{searchdatefrom},'yyyy-mm-dd') ]]>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findListSpecial" resultType="Flowapply" >
+		SELECT DISTINCT
+		<include refid="flowapplyColumns2"/>
+		FROM flowapply a
+		<include refid="flowapplyJoins2"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="processInstanceId != null and processInstanceId != ''">
+				AND a.process_instance_id = #{processInstanceId}
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+			<if test="runprocess_upid != null and runprocess_upid != ''">
+				AND p.upid = #{runprocess_upid}
+			</if>
+			<if test="runflow_status != null and runflow_status != ''">
+				AND l.status = #{runflow_status}
+			</if>
+			<if test="runflow_status_useful != null and runflow_status_useful != '' ">
+				AND (l.status = '0' or l.status = '1')
+			</if>
+			<if test="office != null and office.id != null and office.id != ''">
+				AND a.office_true_id = #{office.id}
+			</if>
+			<if test="templateDetailTemp != null and templateDetailTemp.var1 != null and templateDetailTemp.var1 != ''">
+				AND d.var1 LIKE
+				<if test="dbName == 'oracle'">'%'||#{templateDetailTemp.var1}||'%'</if>
+				<if test="dbName == 'mysql'">CONCAT('%', #{templateDetailTemp.var1}, '%')</if>
+			</if>
+			<if test="templateDetailTemp != null and templateDetailTemp.startdate != null and templateDetailTemp.startdate != ''">
+				AND <![CDATA[to_char(a.create_date,'yyyy-mm-dd')>=to_char(#{templateDetailTemp.startdate},'yyyy-mm-dd') ]]>
+			</if>
+			<if test="templateDetailTemp != null and templateDetailTemp.enddate != null and templateDetailTemp.enddate != ''">
+				AND <![CDATA[to_char(a.create_date,'yyyy-mm-dd')<=to_char(#{templateDetailTemp.enddate},'yyyy-mm-dd') ]]>
+			</if>
+			<if test="templateDetailTemp != null and templateDetailTemp.createusername != null and templateDetailTemp.createusername != ''">
+				AND u.name LIKE
+				<if test="dbName == 'oracle'">'%'||#{templateDetailTemp.createusername}||'%'</if>
+				<if test="dbName == 'mysql'">CONCAT('%', #{templateDetailTemp.createusername}, '%')</if>
+			</if>
+			<if test="dept != null and dept.id != null and dept.id != ''">
+				AND a.office_id = #{dept.id}
+			</if>
+			<if test="flowid != null and flowid != ''">
+				AND a.flowid = #{flowid}
+			</if>
+			<if test="flowtype != null">
+				AND a.flowtype = #{flowtype}
+			</if>
+			<if test="keyword != null and keyword != ''">
+				AND ((u.name like
+				<if test="dbName == 'oracle'">'%'||#{keyword}||'%'</if>
+				<if test="dbName == 'mysql'">CONCAT('%', #{keyword}, '%')</if>
+				OR a.var1 like
+				<if test="dbName == 'oracle'">'%'||#{keyword}||'%'</if>
+				<if test="dbName == 'mysql'">CONCAT('%', #{keyword}, '%')</if>
+				) OR (a.pid like
+				<if test="dbName == 'oracle'">'%'||#{keyword}||'%'</if>
+				<if test="dbName == 'mysql'">CONCAT('%', #{keyword}, '%')</if>) )
+			</if>
+			<if test="applystatetype != null and applystatetype != ''">
+				AND l.status = #{applystatetype}
+			</if>
+			<if test="startdate != null and startdate != ''">
+				AND <![CDATA[to_char(a.create_date,'yyyy-mm-dd')>=to_char(#{startdate},'yyyy-mm-dd') ]]>
+			</if>
+			<if test="enddate != null and enddate != ''">
+				AND <![CDATA[to_char(a.create_date,'yyyy-mm-dd')<=to_char(#{enddate},'yyyy-mm-dd') ]]>
+			</if>
+			<if test="var2 != null and var2 != ''">
+				AND (a.var2 like
+				<if test="dbName == 'oracle'">'%'||#{var2}||'%'</if>
+				<if test="dbName == 'mysql'">CONCAT('%', #{var2}, '%')</if>)
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Flowapply" >
+		SELECT 
+			<include refid="flowapplyColumns"/>
+		FROM flowapply a
+		<include refid="flowapplyJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO flowapply(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			templatecontentid,
+			templateid,
+			flowid,
+			showcolumn,
+			templatehtml,
+			templateviewhtml,
+			process_instance_id,
+		    company_id,
+			office_id,
+			office_true_id,
+			pid,
+			flowtype,
+			var1,
+			var2
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{templatecontentid},
+			#{templateid},
+			#{flowid},
+			#{showcolumn},
+			#{templatehtml},
+			#{templateviewhtml},
+			#{processInstanceId}, 
+			#{company.id}, 
+			#{dept.id}, 
+			#{office.id},
+			flowapply_seq.nextval,
+			#{flowtype},
+			#{var1},
+			#{var2}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE flowapply SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			templatecontentid = #{templatecontentid},
+			templateid = #{templateid},
+			flowid = #{flowid},
+			showcolumn = #{showcolumn},
+			templatehtml=#{templatehtml},
+			templateviewhtml=#{templateviewhtml},
+			process_instance_id = #{processInstanceId},
+			company_id = #{company.id}, 
+			office_id = #{dept.id}, 
+			office_true_id = #{office.id},
+			flowtype = #{flowtype},
+			var1 = #{var1},
+			var2 = #{var2}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM flowapply
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE flowapply SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="Flowapply" statementType="STATEMENT">
+		select * FROM flowapply  where ${propertyName} = '${value}'
+	</select>
+	
+	<update id="updateProcessInstanceId">
+		UPDATE flowapply SET 
+			process_instance_id = #{processInstanceId}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findByProperty" resultType="Flowapply" statementType="STATEMENT">
+		select * FROM flowapply  where ${propertyName} = '${value}'
+	</select>
+</mapper>

@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.checkmodel.dao.CheckDataDao">
+    
+	<sql id="checkDataColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.userid AS "userid",
+		a.userno AS "userno",
+		a.username AS "username",
+		a.officeid AS "officeid",
+		a.officename AS "officename",
+		a.stationid AS "stationid",
+		a.stationname AS "stationname"
+	</sql>
+	
+	<sql id="checkDataJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="CheckData" >
+		SELECT 
+			<include refid="checkDataColumns"/>
+		FROM checkdata a
+		<include refid="checkDataJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CheckData" >
+		SELECT 
+			<include refid="checkDataColumns"/>
+		FROM checkdata a
+		<include refid="checkDataJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL} 
+			<if test="userid != null and userid!=''">
+				and userid=#{userid} 
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="CheckData" >
+		SELECT 
+			<include refid="checkDataColumns"/>
+		FROM checkdata a
+		<include refid="checkDataJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO checkdata(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			userid,
+			userno,
+			username,
+			officeid,
+			officename,
+			stationid,
+			stationname
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{userid},
+			#{userno},
+			#{username},
+			#{officeid},
+			#{officename},
+			#{stationid},
+			#{stationname}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE checkdata SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			userid = #{userid},
+			userno = #{userno},
+			username = #{username},
+			officeid = #{officeid},
+			officename = #{officename},
+			stationid = #{stationid},
+			stationname = #{stationname}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM checkdata
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE checkdata SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="CheckData" statementType="STATEMENT">
+		select * FROM checkdata  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

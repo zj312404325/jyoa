@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.flow.dao.FlowtemplateDao">
+    
+	<sql id="flowtemplateColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.flowremarks AS "flowremarks",
+		a.del_flag AS "delFlag",
+		a.templatename AS "templatename",
+		a.templatehtml AS "templatehtml",
+		a.showcolumn AS "showcolumn",
+		a.templatetype AS "templatetype"
+	</sql>
+	
+	<sql id="flowtemplateJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="Flowtemplate" >
+		SELECT 
+			<include refid="flowtemplateColumns"/>
+		FROM flow_template a
+		<include refid="flowtemplateJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Flowtemplate" >
+		SELECT 
+			<include refid="flowtemplateColumns"/>
+		FROM flow_template a
+		<include refid="flowtemplateJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="templatetype != null">
+				AND a.templatetype = #{templatetype}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Flowtemplate" >
+		SELECT 
+			<include refid="flowtemplateColumns"/>
+		FROM flow_template a
+		<include refid="flowtemplateJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO flow_template(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			flowremarks,
+			del_flag,
+			templatename,
+			templatehtml,
+			showcolumn,
+			templatetype
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{flowremarks},
+			#{delFlag},
+			#{templatename},
+			#{templatehtml},
+			#{showcolumn},
+			#{templatetype}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE flow_template SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			flowremarks = #{flowremarks},
+			templatename = #{templatename},
+			templatehtml = #{templatehtml},
+			showcolumn = #{showcolumn},
+			templatetype = #{templatetype}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM flow_template
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE flow_template SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="Flowtemplate" statementType="STATEMENT">
+		select * FROM flow_template  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.ehr.dao.EntryContractDao">
+    
+	<sql id="entryContractColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.companyid AS "companyid",
+		a.contract AS "contract",
+		a.receivedeptids AS "receivedeptids",
+		a.receivedeptnames AS "receivedeptnames"
+	</sql>
+	
+	<sql id="entryContractJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="EntryContract" >
+		SELECT 
+			<include refid="entryContractColumns"/>
+		FROM entrycontract a
+		<include refid="entryContractJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="EntryContract" >
+		SELECT 
+			<include refid="entryContractColumns"/>
+		FROM entrycontract a
+		<include refid="entryContractJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="companyid != null and companyid != ''">
+			AND (a.receivedeptids like
+				<if test="dbName == 'oracle'">'%'||#{companyid}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{companyid}+'%'</if>
+				<if test="dbName == 'mysql'">concat('%',#{companyid},'%')</if>
+			)
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="EntryContract" >
+		SELECT 
+			<include refid="entryContractColumns"/>
+		FROM entrycontract a
+		<include refid="entryContractJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO entrycontract(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			companyid,
+			contract,
+			receivedeptids,
+			receivedeptnames
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{companyid},
+			#{contract},
+			#{receivedeptids},
+			#{receivedeptnames}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE entrycontract SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			companyid = #{companyid},
+			contract = #{contract},
+			receivedeptids = #{receivedeptids},
+			receivedeptnames = #{receivedeptnames}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM entrycontract
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE entrycontract SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="EntryContract" statementType="STATEMENT">
+		select * FROM entrycontract  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

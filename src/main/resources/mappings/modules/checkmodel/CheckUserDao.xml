@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.checkmodel.dao.CheckUserDao">
+    
+	<sql id="checkUserColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.userid AS "userId",
+		a.userno AS "userNo",
+		a.username AS "userName",
+		a.officeid AS "officeId",
+		a.officename AS "officeName",
+		a.stationid AS "stationId",
+		a.stationname AS "stationName",
+		a.memo AS "memo",
+		a.weight AS "weight",
+		a.checkofficeid AS "checkofficeid",
+		a.checkofficename AS "checkofficename",
+		a.category AS "category"
+	</sql>
+	
+	<sql id="checkUserJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="CheckUser" >
+		SELECT 
+			<include refid="checkUserColumns"/>
+		FROM sys_checkuser a
+		<include refid="checkUserJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CheckUser" >
+		SELECT 
+			<include refid="checkUserColumns"/>
+		FROM sys_checkuser a
+		<include refid="checkUserJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}  
+			<if test="stationId != null and stationId != ''">
+				and a.stationid=#{stationId}
+			</if>
+			<if test="checkofficeid != null and checkofficeid != ''">
+				and a.checkofficeid=#{checkofficeid}
+			</if>
+			<choose>
+				<when test='category !=null and category=="1"'>
+					and category=#{category}
+				</when>
+				<otherwise>
+					and (category is null or category='0')
+				</otherwise>
+			</choose>
+			<if test="userId != null and userId != ''">
+				and a.userId=#{userId}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="CheckUser" >
+		SELECT 
+			<include refid="checkUserColumns"/>
+		FROM sys_checkuser a
+		<include refid="checkUserJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sys_checkuser(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			userid,
+			userno,
+			username,
+			officeid,
+			officename,
+			stationid,
+			stationname,
+			memo,
+			weight,
+			checkofficeid,
+			checkofficename,
+			category
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{userId},
+			#{userNo},
+			#{userName},
+			#{officeId},
+			#{officeName},
+			#{stationId},
+			#{stationName},
+			#{memo},
+			#{weight},
+			#{checkofficeid},
+			#{checkofficename},
+			#{category}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE sys_checkuser SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			userid = #{userId},
+			userno = #{userNo},
+			username = #{userName},
+			officeid = #{officeId},
+			officename = #{officeName},
+			stationid = #{stationId},
+			stationname = #{stationName},
+			memo = #{memo},
+			weight = #{weight},
+			checkofficeid = #{checkofficeid},
+			checkofficename = #{checkofficename},
+			category = #{category}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM sys_checkuser
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE sys_checkuser SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="CheckUser" statementType="STATEMENT">
+		select * FROM sys_checkuser  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

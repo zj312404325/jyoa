@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.leipiflow.dao.LeipiRunCacheDao">
+    
+	<sql id="leipiRunCacheColumns">
+		a.id AS "id",
+		a.run_id AS "runId",
+		a.form_id AS "formId",
+		a.flow_id AS "flowId",
+		a.run_flow_process AS "runFlowProcess",
+		a.is_del AS "isDel",
+		a.updatetime AS "updatetime",
+		a.dateline AS "dateline"
+	</sql>
+	
+	<sql id="leipiRunCacheJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="LeipiRunCache" >
+		SELECT 
+			<include refid="leipiRunCacheColumns"/>
+		FROM leipi_run_cache a
+		<include refid="leipiRunCacheJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="LeipiRunCache" >
+		SELECT 
+			<include refid="leipiRunCacheColumns"/>
+		FROM leipi_run_cache a
+		<include refid="leipiRunCacheJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="LeipiRunCache" >
+		SELECT 
+			<include refid="leipiRunCacheColumns"/>
+		FROM leipi_run_cache a
+		<include refid="leipiRunCacheJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO leipi_run_cache(
+			id,
+			run_id,
+			form_id,
+			flow_id,
+			run_flow_process,
+			is_del,
+			updatetime,
+			dateline
+		) VALUES (
+			#{id},
+			#{runId},
+			#{formId},
+			#{flowId},
+			#{runFlowProcess},
+			#{isDel},
+			#{updatetime},
+			#{dateline}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE leipi_run_cache SET 	
+			flow_id = #{flowId},
+			run_flow_process = #{runFlowProcess},
+			is_del = #{isDel},
+			dateline = #{dateline}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM leipi_run_cache
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE leipi_run_cache SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="LeipiRunCache" statementType="STATEMENT">
+		select * FROM leipi_run_cache  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

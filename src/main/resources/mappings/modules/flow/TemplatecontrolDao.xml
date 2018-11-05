@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.flow.dao.TemplatecontrolDao">
+    
+	<sql id="templatecontrolColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.flow_template AS "flowtemplate.id",
+		a.columnname AS "columnname",
+		a.columnid AS "columnid",
+		a.columntype AS "columntype",
+		a.columnvalue AS "columnvalue",
+		a.columnsort AS "columnsort",
+		a.columnlocate AS "columnlocate",
+		a.valuerequire AS "valuerequire"
+	</sql>
+	
+	<sql id="templatecontrolJoins">
+		LEFT JOIN flow_template b ON b.id = a.flow_template
+	</sql>
+	
+    
+	<select id="get" resultType="Templatecontrol" >
+		SELECT 
+			<include refid="templatecontrolColumns"/>
+		FROM templatecontrol a
+		<include refid="templatecontrolJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Templatecontrol" >
+		SELECT 
+			<include refid="templatecontrolColumns"/>
+		FROM templatecontrol a
+		<include refid="templatecontrolJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="flowtemplate != null and flowtemplate.id != null and flowtemplate.id != ''">
+				AND a.flow_template = #{flowtemplate.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.columnsort ASC,a.create_date ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Templatecontrol" >
+		SELECT 
+			<include refid="templatecontrolColumns"/>
+		FROM templatecontrol a
+		<include refid="templatecontrolJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO templatecontrol(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			flow_template,
+			columnname,
+			columnid,
+			columntype,
+			columnvalue,
+			columnsort,
+			columnlocate,
+			valuerequire
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{flowtemplate.id},
+			#{columnname},
+			#{columnid},
+			#{columntype},
+			#{columnvalue},
+			#{columnsort},
+			#{columnlocate},
+			#{valuerequire}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE templatecontrol SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			flow_template = #{flowtemplate.id},
+			columnname = #{columnname},
+			columnid = #{columnid},
+			columntype = #{columntype},
+			columnvalue = #{columnvalue},
+			columnsort = #{columnsort},
+			columnlocate = #{columnlocate},
+			valuerequire = #{valuerequire}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM templatecontrol
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE flow_template = #{flowtemplate.id}
+			</otherwise>
+		</choose>
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE templatecontrol SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE flow_template = #{flowtemplate.id}
+			</otherwise>
+		</choose>
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="Templatecontrol" statementType="STATEMENT">
+		select * FROM templatecontrol  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.oaqa.dao.OaquestionDao">
+    
+	<sql id="oaquestionColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.question AS "question"
+	</sql>
+	
+	<sql id="oaquestionJoins">
+		left join oaanswer an on an.quertionid = a.id
+	</sql>
+	
+    
+	<select id="get" resultType="Oaquestion" >
+		SELECT 
+			<include refid="oaquestionColumns"/>
+		FROM oaquestion a
+		<include refid="oaquestionJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Oaquestion" >
+		SELECT DISTINCT
+			<include refid="oaquestionColumns"/>
+		FROM oaquestion a
+		<include refid="oaquestionJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="var1 != null and var1 != ''">
+				AND (a.question LIKE
+				<if test="dbName == 'oracle'">'%'||#{var1}||'%'</if>
+				<if test="dbName == 'mysql'">CONCAT('%', #{var1}, '%')</if>
+				OR an.answer LIKE
+				<if test="dbName == 'oracle'">'%'||#{var1}||'%'</if>
+				<if test="dbName == 'mysql'">CONCAT('%', #{var1}, '%')</if>)
+			</if>
+            <if test="hasanswer != null and hasanswer != '' and hasanswer == 'yes' ">
+                AND (select count(1) from oaanswer an2 where an2.quertionid = a.id) > 0
+            </if>
+            <if test="hasanswer != null and hasanswer != '' and hasanswer == 'no' ">
+                AND (select count(1) from oaanswer an2 where an2.quertionid = a.id) = 0
+            </if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Oaquestion" >
+		SELECT 
+			<include refid="oaquestionColumns"/>
+		FROM oaquestion a
+		<include refid="oaquestionJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oaquestion(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			question
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{question}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oaquestion SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			question = #{question}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM oaquestion
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE oaquestion SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="Oaquestion" statementType="STATEMENT">
+		select * FROM oaquestion  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.checkmodel.dao.PerformanceCheckDetailDao">
+    
+	<sql id="performanceCheckDetailColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.kpi AS "kpi",
+		a.referencepoint AS "referencepoint",
+		a.weight AS "weight",
+		a.type AS "type",
+		a.sort AS "sort",
+		a.performancecheckid AS "performancecheckid",
+		a.execution AS "execution",
+		a.selfscore AS "selfscore",
+		a.score AS "score"
+	</sql>
+	
+	<sql id="performanceCheckDetailJoins">
+		LEFT JOIN performancecheck b ON b.id = a.performancecheckid
+	</sql>
+	
+    
+	<select id="get" resultType="PerformanceCheckDetail" >
+		SELECT 
+			<include refid="performanceCheckDetailColumns"/>
+		FROM performancecheckdetail a
+		<include refid="performanceCheckDetailJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="PerformanceCheckDetail" >
+		SELECT 
+			<include refid="performanceCheckDetailColumns"/>
+		FROM performancecheckdetail a
+		<include refid="performanceCheckDetailJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="performancecheckid != null and performancecheckid != ''">
+				AND a.performancecheckid = #{performancecheckid.id}
+			</if>
+			<if test="performancecheckid.type != null">
+				AND a.type = #{performancecheckid.type}
+			</if>
+		</where>
+		<choose>
+			<when test="performancecheckid.page !=null and performancecheckid.page.orderBy != null and performancecheckid.page.orderBy != ''">
+				ORDER BY ${performancecheckid.page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="PerformanceCheckDetail" >
+		SELECT 
+			<include refid="performanceCheckDetailColumns"/>
+		FROM performancecheckdetail a
+		<include refid="performanceCheckDetailJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO performancecheckdetail(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			kpi,
+			referencepoint,
+			weight,
+			type,
+			sort,
+			performancecheckid,
+			execution,
+			selfscore,
+			score
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{kpi},
+			#{referencepoint},
+			#{weight},
+			#{type},
+			#{sort},
+			#{performancecheckid.id},
+			#{execution},
+			#{selfscore},
+			#{score}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE performancecheckdetail SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			kpi = #{kpi},
+			referencepoint = #{referencepoint},
+			weight = #{weight},
+			type = #{type},
+			sort = #{sort},
+			performancecheckid = #{performancecheckid.id},
+			execution = #{execution},
+			selfscore = #{selfscore},
+			score = #{score}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM performancecheckdetail
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE performancecheckid = #{performancecheckid.id}
+			</otherwise>
+		</choose>
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE performancecheckdetail SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE performancecheckid = #{performancecheckid.id}
+			</otherwise>
+		</choose>
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="PerformanceCheckDetail" statementType="STATEMENT">
+		select * FROM performancecheckdetail  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

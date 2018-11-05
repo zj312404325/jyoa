@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.contractmanager.dao.ContractManagerDao">
+    
+	<sql id="contractManagerColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.contractname AS "contractname",
+		a.contractno AS "contractno",
+		a.signdate AS "signdate",
+		a.contractclassid AS "contractclassid",
+		a.contractclass AS "contractclass",
+		a.fundnatureid AS "fundnatureid",
+		a.fundnature AS "fundnature",
+		a.effectivedate AS "effectivedate",
+		a.contractamount AS "contractamount",
+		a.currencyid AS "currencyid",
+		a.currency AS "currency",
+		a.plancompletiondate AS "plancompletiondate",
+		a.stamptax AS "stamptax",
+		a.affiliationid AS "affiliationid",
+		a.affiliation AS "affiliation",
+		a.remark1 AS "remark1",
+		a.remark2 AS "remark2",
+		a.contractpartyid AS "contractpartyid",
+		a.contractparty AS "contractparty",
+		a.projectid AS "projectid",
+		a.project AS "project",
+		a.responsiblepersonid AS "responsiblepersonid",
+		a.responsibleperson AS "responsibleperson",
+		a.status AS "status",
+		a.fundclause AS "fundclause",
+		a.inquirerid AS "inquirerid",
+		a.inquirer AS "inquirer",
+		a.completedate AS "completedate",
+		a.receiveuserids AS "receiveuserids",
+		a.receiveusernames AS "receiveusernames"
+	</sql>
+	
+	<sql id="contractManagerJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="ContractManager" >
+		SELECT 
+			<include refid="contractManagerColumns"/>
+		FROM contractmanager a
+		<include refid="contractManagerJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="ContractManager" >
+		SELECT 
+			<include refid="contractManagerColumns"/>
+		FROM contractmanager a
+		<include refid="contractManagerJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="contractpartyid != null and contractpartyid != ''">
+				AND a.contractpartyid = #{contractpartyid}
+			</if>
+			<if test="projectid != null and projectid != ''">
+				AND a.projectid = #{projectid}
+			</if>
+			<if test="startdate != null and startdate != ''">
+				AND <![CDATA[to_char(a.create_date,'yyyy-mm-dd')>=to_char(#{startdate},'yyyy-mm-dd') ]]>
+			</if>
+			<if test="enddate != null and enddate != ''">
+				AND <![CDATA[to_char(a.create_date,'yyyy-mm-dd')<=to_char(#{enddate},'yyyy-mm-dd') ]]>
+			</if>
+			<if test="contractname != null and contractname != ''">
+				AND a.contractname like
+				<if test="dbName == 'oracle'">'%'||#{contractname}||'%'</if>
+				<if test="dbName == 'mysql'">CONCAT('%', #{contractname}, '%')</if>
+			</if>
+			<if test="contractparty != null and contractparty != ''">
+				AND a.contractparty like
+				<if test="dbName == 'oracle'">'%'||#{contractparty}||'%'</if>
+				<if test="dbName == 'mysql'">CONCAT('%', #{contractparty}, '%')</if>
+			</if>
+			<if test="contractclassid != null and contractclassid != ''">
+				AND a.contractclassid = #{contractclassid}
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND (a.create_by = #{createBy.id}
+				OR a.receiveuserids like '%'||#{createBy.id}||'%')
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="ContractManager" >
+		SELECT 
+			<include refid="contractManagerColumns"/>
+		FROM contractmanager a
+		<include refid="contractManagerJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO contractmanager(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			contractname,
+			contractno,
+			signdate,
+			contractclassid,
+			contractclass,
+			fundnatureid,
+			fundnature,
+			effectivedate,
+			contractamount,
+			currencyid,
+			currency,
+			plancompletiondate,
+			stamptax,
+			affiliationid,
+			affiliation,
+			remark1,
+			remark2,
+			contractpartyid,
+			contractparty,
+			projectid,
+			project,
+			responsiblepersonid,
+			responsibleperson,
+			status,
+			fundclause,
+			inquirerid,
+			inquirer,
+			completedate,
+			receiveuserids,
+		    receiveusernames
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{contractname},
+			#{contractno},
+			#{signdate},
+			#{contractclassid},
+			#{contractclass},
+			#{fundnatureid},
+			#{fundnature},
+			#{effectivedate},
+			#{contractamount},
+			#{currencyid},
+			#{currency},
+			#{plancompletiondate},
+			#{stamptax},
+			#{affiliationid},
+			#{affiliation},
+			#{remark1},
+			#{remark2},
+			#{contractpartyid},
+			#{contractparty},
+			#{projectid},
+			#{project},
+			#{responsiblepersonid},
+			#{responsibleperson},
+			#{status},
+			#{fundclause},
+			#{inquirerid},
+			#{inquirer},
+			#{completedate},
+			#{receiveuserids},
+		    #{receiveusernames}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE contractmanager SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			contractname = #{contractname},
+			contractno = #{contractno},
+			signdate = #{signdate},
+			contractclassid = #{contractclassid},
+			contractclass = #{contractclass},
+			fundnatureid = #{fundnatureid},
+			fundnature = #{fundnature},
+			effectivedate = #{effectivedate},
+			contractamount = #{contractamount},
+			currencyid = #{currencyid},
+			currency = #{currency},
+			plancompletiondate = #{plancompletiondate},
+			stamptax = #{stamptax},
+			affiliationid = #{affiliationid},
+			affiliation = #{affiliation},
+			remark1 = #{remark1},
+			remark2 = #{remark2},
+			contractpartyid = #{contractpartyid},
+			contractparty = #{contractparty},
+			projectid = #{projectid},
+			project = #{project},
+			responsiblepersonid = #{responsiblepersonid},
+			responsibleperson = #{responsibleperson},
+			status = #{status},
+			fundclause = #{fundclause},
+			inquirerid = #{inquirerid},
+			inquirer = #{inquirer},
+			completedate = #{completedate},
+			receiveuserids=#{receiveuserids},
+		    receiveusernames=#{receiveusernames}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM contractmanager
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE contractmanager SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="ContractManager" statementType="STATEMENT">
+		select * FROM contractmanager  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

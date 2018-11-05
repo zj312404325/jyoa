@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.contractmanager.dao.ActualfundSearchDao">
+    
+	<sql id="actualfundSearchColumns">
+		a.id AS "id",
+		cm.contractname AS "contractname",
+		cm.contractno AS "contractno",
+		cm.id AS "contractid",
+		cm.contractclass AS "contractclass",
+		a.money AS "money",
+		ct.customername AS "customername",
+		ct.customerclass AS "customerclass",
+		a.settlementdate AS "settlementdate",
+		a.remark1 AS "remark1",
+		a.remark2 AS "remark2"
+	</sql>
+	
+	<sql id="actualfundSearchJoins">
+		left join contractmanager cm on a.contractmanager=cm.id 
+		left join customer ct on cm.contractpartyid=ct.id 
+	</sql>
+	
+    
+	<select id="get" resultType="ActualfundSearch" >
+		SELECT 
+			<include refid="actualfundSearchColumns"/>
+		FROM actualfundsearch a
+		<include refid="actualfundSearchJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="ActualfundSearch" >
+		SELECT 
+			<include refid="actualfundSearchColumns"/>
+		FROM contractactualfunds a
+		<include refid="actualfundSearchJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="createBy != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+			<if test="fundnatureid != null and fundnatureid != ''">
+				and cm.fundnatureid=#{fundnatureid}
+			</if>
+			<if test="contractname != null and contractname != ''">
+				AND cm.contractname like 
+					<if test="dbName == 'oracle'">'%'||#{contractname}||'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{contractname}, '%')</if>
+			</if>
+			<if test="contractno != null and contractno != ''">
+				AND cm.contractno like 
+					<if test="dbName == 'oracle'">'%'||#{contractno}||'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{contractno}, '%')</if>
+			</if>
+			<if test="contractclassid != null and contractclassid != ''">
+				and cm.contractclassid=#{contractclassid}
+			</if>
+			<if test="customername != null and customername != ''">
+				AND ct.customername like 
+					<if test="dbName == 'oracle'">'%'||#{customername}||'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{customername}, '%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="ActualfundSearch" >
+		SELECT 
+			<include refid="actualfundSearchColumns"/>
+		FROM actualfundsearch a
+		<include refid="actualfundSearchJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="createBy != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO actualfundsearch(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			money,
+			contractname,
+			contractno,
+			contractid,
+			contractclass,
+			contractclassid,
+			settlementdate,
+			customername,
+			customerclassid
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{money},
+			#{contractname},
+			#{contractno},
+			#{contractid},
+			#{contractclass},
+			#{contractclassid},
+			#{settlementdate},
+			#{customername},
+			#{customerclassid}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE actualfundsearch SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			money = #{money},
+			contractname = #{contractname},
+			contractno = #{contractno},
+			contractid = #{contractid},
+			contractclass = #{contractclass},
+			contractclassid = #{contractclassid},
+			settlementdate = #{settlementdate},
+			customername = #{customername},
+			customerclassid = #{customerclassid}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM actualfundsearch
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE actualfundsearch SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="ActualfundSearch" statementType="STATEMENT">
+		select * FROM actualfundsearch  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

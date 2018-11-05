@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.sutoroa.dao.HygieneplatformdepartDao">
+    
+	<sql id="hygieneplatformdepartColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.hyqieneid AS "hyqieneid",
+		a.depart AS "depart",
+		a.departname AS "departname",
+		a.morningrecord AS "morningrecord",
+		a.weekrecord AS "weekrecord",
+		a.whzrr AS "whzrr",
+		a.wfbxp AS "wfbxp",
+		a.keepclear AS "keepclear",
+		a.msb AS "msb",
+		a.msh AS "msh",
+		a.kq AS "kq",
+		a.wjzl AS "wjzl",
+		a.mrbx AS "mrbx",
+		a.srwp AS "srwp",
+		a.qjp AS "qjp",
+		a.dmgj AS "dmgj",
+		a.tzzx AS "tzzx",
+		a.yb AS "yb",
+		a.wjggj AS "wjggj",
+		a.wjgbs AS "wjgbs",
+		a.wjgbf AS "wjgbf",
+		a.wjjbs AS "wjjbs",
+		a.wjjml AS "wjjml",
+		a.mcgj AS "mcgj",
+		a.ctgj AS "ctgj",
+		a.dngj AS "dngj",
+		a.dnx AS "dnx",
+		a.dnzl AS "dnzl",
+		a.hhxx AS "hhxx",
+		a.hys AS "hys",
+		a.gztd AS "gztd",
+		a.yzzj AS "yzzj",
+		a.ttwy AS "ttwy",
+		a.gzsj AS "gzsj",
+		a.lts AS "lts",
+		a.xblk AS "xblk",
+		a.wrgm AS "wrgm",
+		a.xxsd AS "xxsd",
+		a.dwsb AS "dwsb",
+		a.gsyj AS "gsyj",
+		a.xbgm AS "xbgm",
+		a.wjgs AS "wjgs",
+		a.wrdy AS "wrdy",
+		a.ktsd AS "ktsd",
+		a.wpsh AS "wpsh",
+		a.jdpx AS "jdpx",
+		a.bmpx AS "bmpx",
+		a.score AS "score",
+		a.isdel AS "isdel",
+		a.sort AS "sort"
+	</sql>
+	
+	<sql id="hygieneplatformdepartJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="Hygieneplatformdepart" >
+		SELECT 
+			<include refid="hygieneplatformdepartColumns"/>
+		FROM hygieneplatformdepart a
+		<include refid="hygieneplatformdepartJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Hygieneplatformdepart" >
+		SELECT 
+			<include refid="hygieneplatformdepartColumns"/>
+		FROM hygieneplatformdepart a
+		<include refid="hygieneplatformdepartJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="hyqieneid != null and hyqieneid != ''">
+				AND a.hyqieneid = #{hyqieneid}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Hygieneplatformdepart" >
+		SELECT 
+			<include refid="hygieneplatformdepartColumns"/>
+		FROM hygieneplatformdepart a
+		<include refid="hygieneplatformdepartJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO hygieneplatformdepart(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			hyqieneid,
+			depart,
+			departname,
+			morningrecord,
+			weekrecord,
+			whzrr,
+			wfbxp,
+			keepclear,
+			msb,
+			msh,
+			kq,
+			wjzl,
+			mrbx,
+			srwp,
+			qjp,
+			dmgj,
+			tzzx,
+			yb,
+			wjggj,
+			wjgbs,
+			wjgbf,
+			wjjbs,
+			wjjml,
+			mcgj,
+			ctgj,
+			dngj,
+			dnx,
+			dnzl,
+			hhxx,
+			hys,
+			gztd,
+			yzzj,
+			ttwy,
+			gzsj,
+			lts,
+			xblk,
+			wrgm,
+			xxsd,
+			dwsb,
+			gsyj,
+			xbgm,
+			wjgs,
+			wrdy,
+			ktsd,
+			wpsh,
+			jdpx,
+			bmpx,
+			score,
+			isdel,
+			sort
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{hyqieneid},
+			#{depart},
+			#{departname},
+			#{morningrecord},
+			#{weekrecord},
+			#{whzrr},
+			#{wfbxp},
+			#{keepclear},
+			#{msb},
+			#{msh},
+			#{kq},
+			#{wjzl},
+			#{mrbx},
+			#{srwp},
+			#{qjp},
+			#{dmgj},
+			#{tzzx},
+			#{yb},
+			#{wjggj},
+			#{wjgbs},
+			#{wjgbf},
+			#{wjjbs},
+			#{wjjml},
+			#{mcgj},
+			#{ctgj},
+			#{dngj},
+			#{dnx},
+			#{dnzl},
+			#{hhxx},
+			#{hys},
+			#{gztd},
+			#{yzzj},
+			#{ttwy},
+			#{gzsj},
+			#{lts},
+			#{xblk},
+			#{wrgm},
+			#{xxsd},
+			#{dwsb},
+			#{gsyj},
+			#{xbgm},
+			#{wjgs},
+			#{wrdy},
+			#{ktsd},
+			#{wpsh},
+			#{jdpx},
+			#{bmpx},
+			#{score},
+			#{isdel},
+			#{sort}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE hygieneplatformdepart SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			hyqieneid = #{hyqieneid},
+			depart = #{depart},
+			departname = #{departname},
+			morningrecord = #{morningrecord},
+			weekrecord = #{weekrecord},
+			whzrr = #{whzrr},
+			wfbxp = #{wfbxp},
+			keepclear = #{keepclear},
+			msb = #{msb},
+			msh = #{msh},
+			kq = #{kq},
+			wjzl = #{wjzl},
+			mrbx = #{mrbx},
+			srwp = #{srwp},
+			qjp = #{qjp},
+			dmgj = #{dmgj},
+			tzzx = #{tzzx},
+			yb = #{yb},
+			wjggj = #{wjggj},
+			wjgbs = #{wjgbs},
+			wjgbf = #{wjgbf},
+			wjjbs = #{wjjbs},
+			wjjml = #{wjjml},
+			mcgj = #{mcgj},
+			ctgj = #{ctgj},
+			dngj = #{dngj},
+			dnx = #{dnx},
+			dnzl = #{dnzl},
+			hhxx = #{hhxx},
+			hys = #{hys},
+			gztd = #{gztd},
+			yzzj = #{yzzj},
+			ttwy = #{ttwy},
+			gzsj = #{gzsj},
+			lts = #{lts},
+			xblk = #{xblk},
+			wrgm = #{wrgm},
+			xxsd = #{xxsd},
+			dwsb = #{dwsb},
+			gsyj = #{gsyj},
+			xbgm = #{xbgm},
+			wjgs = #{wjgs},
+			wrdy = #{wrdy},
+			ktsd = #{ktsd},
+			wpsh = #{wpsh},
+			jdpx = #{jdpx},
+			bmpx = #{bmpx},
+			score = #{score},
+			isdel = #{isdel},
+			sort = #{sort}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM hygieneplatformdepart
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE hygieneplatformdepart SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="Hygieneplatformdepart" statementType="STATEMENT">
+		select * FROM hygieneplatformdepart  where ${propertyName} = '${value}'
+	</select>
+
+	<update id="delHygieneplatformdepart" parameterType="java.util.Map">
+		delete from hygieneplatformdepart
+		where hyqieneid = #{id}
+	</update>
+</mapper>

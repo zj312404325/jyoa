@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.filemanagement.dao.ProjectTimeDao">
+    
+	<sql id="projectTimeColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.project AS "project.id",
+		a.matter AS "matter",
+		a.planstarttime AS "planstarttime",
+		a.planendtime AS "planendtime",
+		a.memo AS "memo",
+		a.createusername AS "createusername"
+	</sql>
+	
+	<sql id="projectTimeJoins">
+		LEFT JOIN projectmanage b ON b.id = a.project
+	</sql>
+	
+    
+	<select id="get" resultType="ProjectTime" >
+		SELECT 
+			<include refid="projectTimeColumns"/>
+		FROM projecttime a
+		<include refid="projectTimeJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="ProjectTime" >
+		SELECT 
+			<include refid="projectTimeColumns"/>
+		FROM projecttime a
+		<include refid="projectTimeJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="project != null and project.id != null and project.id != ''">
+				AND a.project = #{project.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="ProjectTime" >
+		SELECT 
+			<include refid="projectTimeColumns"/>
+		FROM projecttime a
+		<include refid="projectTimeJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO projecttime(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			project,
+			matter,
+			planstarttime,
+			planendtime,
+			memo,
+			createusername
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{project.id},
+			#{matter},
+			#{planstarttime},
+			#{planendtime},
+			#{memo},
+			#{createusername}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE projecttime SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			project = #{project.id},
+			matter = #{matter},
+			planstarttime = #{planstarttime},
+			planendtime = #{planendtime},
+			memo = #{memo},
+			createusername = #{createusername}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM projecttime
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE project = #{project.id}
+			</otherwise>
+		</choose>
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE projecttime SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE project = #{project.id}
+			</otherwise>
+		</choose>
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="ProjectTime" statementType="STATEMENT">
+		select * FROM projecttime  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

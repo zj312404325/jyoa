@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.filemanagement.dao.FileManagementDao">
+    
+	<sql id="fileManagementColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.categoryid AS "categoryid",
+		a.categoryname AS "categoryname",
+		a.title AS "title",
+		a.fileno AS "fileno",
+		a.rollno AS "rollno",
+		a.categoryno AS "categoryno",
+		a.fondno AS "fondno",
+		a.pieceno AS "pieceno",
+		a.wirteno AS "wirteno",
+		a.organization AS "organization",
+		a.fileyear AS "fileyear",
+		a.filemonth AS "filemonth",
+		a.secret AS "secret",
+		a.position AS "position",
+		a.num AS "num",
+		a.pages AS "pages",
+		a.savetime AS "savetime",
+		a.destory AS "destory",
+		a.effectivedate AS "effectivedate",
+		a.expirydate AS "expirydate",
+		a.fileurl AS "fileurl",
+		a.filepdf AS "filepdf",
+		a.createusername AS "createusername",
+		a.memo AS "memo",
+		a.complete AS "complete",
+		a.filefrom AS "filefrom",
+		a.fileid AS "fileid",
+		a.receiveuserids AS "receiveuserids",
+		a.receiveusernames AS "receiveusernames"
+	</sql>
+	
+	<sql id="fileManagementJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="FileManagement" >
+		SELECT 
+			<include refid="fileManagementColumns"/>
+		FROM filemanagement a
+		<include refid="fileManagementJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="FileManagement" >
+		SELECT 
+			<include refid="fileManagementColumns"/>
+		FROM filemanagement a
+		<include refid="fileManagementJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL} 
+			<if test="isManager != null and isManager != 1">
+				AND a.create_by = #{createBy.id}
+			</if>
+			<if test="categoryIds != null and categoryIds != ''">
+				AND a.categoryid in(${categoryIds})
+			</if>
+			<if test="startdate != null and startdate != ''">
+				AND <![CDATA[to_char(a.create_date,'yyyy-mm-dd')>=to_char(#{startdate},'yyyy-mm-dd') ]]>   
+			</if>
+			<if test="enddate != null and enddate != ''">
+				AND <![CDATA[to_char(a.create_date,'yyyy-mm-dd')<=to_char(#{enddate},'yyyy-mm-dd') ]]>
+			</if>
+			<if test="title != null and title != ''">
+				AND a.title like 
+					<if test="dbName == 'oracle'">'%'||#{title}||'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{title}, '%')</if>
+			</if>
+			<if test="secret != null and secret != ''">
+				AND a.secret=#{secret} 
+			</if>
+			<if test="fileno != null and fileno != ''">
+				AND a.fileno like 
+					<if test="dbName == 'oracle'">'%'||#{fileno}||'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{fileno}, '%')</if>
+			</if>
+			<if test="rollno != null and rollno != ''">
+				AND a.rollno like 
+					<if test="dbName == 'oracle'">'%'||#{rollno}||'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{rollno}, '%')</if>
+			</if>
+			<if test="isCurrentMonth != null and isCurrentMonth != ''">
+				<if test="dbName == 'oracle'">and to_char(sysdate,'yyyy-mm')=to_char(a.create_date,'yyyy-mm')</if>
+			</if>
+			<if test="fileyear != null and fileyear != ''">
+				AND a.fileyear = #{fileyear}
+			</if>
+			<if test="filemonth != null and filemonth != ''">
+				AND a.filemonth = #{filemonth}
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				and a.create_by = #{createBy.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="FileManagement" >
+		SELECT 
+			<include refid="fileManagementColumns"/>
+		FROM filemanagement a
+		<include refid="fileManagementJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO filemanagement(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			categoryid,
+			categoryname,
+			title,
+			fileno,
+			rollno,
+			categoryno,
+			fondno,
+			pieceno,
+			wirteno,
+			organization,
+			fileyear,
+			filemonth,
+			secret,
+			position,
+			num,
+			pages,
+			savetime,
+			destory,
+			effectivedate,
+			expirydate,
+			fileurl,
+			filepdf,
+			createusername,
+			memo,
+			complete,
+			filefrom,
+			fileid,
+			receiveuserids,
+		    receiveusernames
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{categoryid},
+			#{categoryname},
+			#{title},
+			#{fileno},
+			#{rollno},
+			#{categoryno},
+			#{fondno},
+			#{pieceno},
+			#{wirteno},
+			#{organization},
+			#{fileyear},
+			#{filemonth},
+			#{secret},
+			#{position},
+			#{num},
+			#{pages},
+			#{savetime},
+			#{destory},
+			#{effectivedate},
+			#{expirydate},
+			#{fileurl},
+			#{filepdf},
+			#{createusername},
+			#{memo},
+			#{complete},
+			#{filefrom},
+			#{fileid},
+			#{receiveuserids},
+		    #{receiveusernames}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE filemanagement SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			categoryid = #{categoryid},
+			categoryname = #{categoryname},
+			title = #{title},
+			fileno = #{fileno},
+			rollno = #{rollno},
+			categoryno = #{categoryno},
+			fondno = #{fondno},
+			pieceno = #{pieceno},
+			wirteno = #{wirteno},
+			organization = #{organization},
+			fileyear = #{fileyear},
+			filemonth = #{filemonth},
+			secret = #{secret},
+			position = #{position},
+			num = #{num},
+			pages = #{pages},
+			savetime = #{savetime},
+			destory = #{destory},
+			effectivedate = #{effectivedate},
+			expirydate = #{expirydate},
+			fileurl = #{fileurl},
+			filepdf = #{filepdf},
+			createusername = #{createusername},
+			memo = #{memo},
+			complete = #{complete},
+			filefrom=#{filefrom},
+			fileid=#{fileid},
+			receiveuserids=#{receiveuserids},
+		    receiveusernames=#{receiveusernames}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM filemanagement
+		WHERE id = #{id}
+	</update>
+
+	<update id="deleteFrom">
+		DELETE FROM filemanagement
+		WHERE fileid = #{fileid}
+        <if test="filefrom != null and filefrom != ''">
+            AND filefrom = #{filefrom}
+        </if>
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE filemanagement SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="FileManagement" statementType="STATEMENT">
+		select * FROM filemanagement  where ${propertyName} = '${value}'
+	</select>
+</mapper>

@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.leipiflow.dao.LeipiFlowDao">
+    
+	<sql id="leipiFlowColumns">
+		a.id AS "id",
+		a.cat_id AS "catid",
+		a.form_id AS "formid",
+		a.flow_type AS "flowtype",
+		a.flow_name AS "flowname",
+		a.flow_desc AS "flowdesc",
+		a.sort_order AS "sortorder",
+		a.status AS "status",
+		a.is_del AS "isdel",
+		a.updatetime AS "updatetime",
+		a.dateline AS "dateline",
+		a.receivedeptids AS "receivedeptids",
+		a.receiveuserids AS "receiveuserids",
+		a.receivedeptnames AS "receivedeptnames",
+		a.receiveusernames AS "receiveusernames",
+		a.leipiflowtype AS "leipiflowtype"
+	</sql>
+	
+	<sql id="leipiFlowJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="LeipiFlow" >
+		SELECT 
+			<include refid="leipiFlowColumns"/>
+		FROM leipi_flow a
+		<include refid="leipiFlowJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="LeipiFlow" >
+		SELECT 
+			<include refid="leipiFlowColumns"/>
+		FROM leipi_flow a
+		<include refid="leipiFlowJoins"/>
+		<where>
+			
+			<if test="flowtype != null and flowtype != ''">
+				AND a.flow_type = #{flowtype}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="leipiflowtype != null">
+				AND a.leipiflowtype = #{leipiflowtype}
+			</if>
+			<if test="flowname != null and flowname != ''">
+				AND a.flow_name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{flowname}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{flowname}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{flowname},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findUseableList" resultType="LeipiFlow" >
+		SELECT 
+			<include refid="leipiFlowColumns"/>
+		FROM leipi_flow a
+		<include refid="leipiFlowJoins"/>
+		<where>
+			
+			<if test="flowtype != null and flowtype != ''">
+				AND a.flow_type = #{flowtype}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="leipiflowtype != null">
+				AND a.leipiflowtype = #{leipiflowtype}
+			</if>
+			<if test="flowname != null and flowname != ''">
+				AND a.flow_name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{flowname}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{flowname}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{flowname},'%')</if>
+			</if>
+			AND (a.receivedeptids like 
+					<if test="dbName == 'oracle'">'%'||#{createBy.office.id}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{createBy.office.id}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{createBy.office.id},'%')</if>
+				or a.receiveuserids like 
+					<if test="dbName == 'oracle'">'%'||#{createBy.id}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{createBy.id}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{createBy.id},'%')</if>
+			)
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="LeipiFlow" >
+		SELECT 
+			<include refid="leipiFlowColumns"/>
+		FROM leipi_flow a
+		<include refid="leipiFlowJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO leipi_flow(
+			id,
+			cat_id,
+			form_id,
+			flow_type,
+			flow_name,
+			flow_desc,
+			sort_order,
+			status,
+			is_del,
+			updatetime,
+			dateline,
+			receivedeptids,
+			receiveuserids,
+			receivedeptnames,
+			receiveusernames,
+			leipiflowtype
+		) VALUES (
+			#{id},
+			#{catid},
+			#{formid},
+			#{flowtype},
+			#{flowname},
+			#{flowdesc},
+			#{sortorder},
+			#{status},
+			#{isdel},
+			#{updatetime},
+			#{dateline},
+			#{receivedeptids},
+			#{receiveuserids},
+			#{receivedeptnames},
+			#{receiveusernames},
+			#{leipiflowtype}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE leipi_flow SET 	
+			flow_type = #{flowtype},
+			form_id = #{formid},
+			flow_name = #{flowname},
+			flow_desc = #{flowdesc},
+			status = #{status},
+			is_del = #{isdel},
+			updatetime = #{updatetime},
+			dateline = #{dateline},
+			receivedeptids = #{receivedeptids},
+			receiveuserids = #{receiveuserids},
+			receivedeptnames = #{receivedeptnames},
+			receiveusernames = #{receiveusernames},
+			leipiflowtype = #{leipiflowtype}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM leipi_flow
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE leipi_flow SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="LeipiFlow" statementType="STATEMENT">
+		select * FROM leipi_flow  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

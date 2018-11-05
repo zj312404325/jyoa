@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.jpush.dao.JpushregisterDao">
+    
+	<sql id="jpushregisterColumns">
+		a.id AS "id",
+		a.registerid AS "registerid",
+		a.userid AS "userid"
+	</sql>
+	
+	<sql id="jpushregisterJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="Jpushregister" >
+		SELECT 
+			<include refid="jpushregisterColumns"/>
+		FROM jpush_register a
+		<include refid="jpushregisterJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Jpushregister" >
+		SELECT 
+			<include refid="jpushregisterColumns"/>
+		FROM jpush_register a
+		<include refid="jpushregisterJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Jpushregister" >
+		SELECT 
+			<include refid="jpushregisterColumns"/>
+		FROM jpush_register a
+		<include refid="jpushregisterJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO jpush_register(
+			id,
+			registerid,
+			userid
+		) VALUES (
+			#{id},
+			#{registerid},
+			#{userid}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE jpush_register SET 	
+			registerid = #{registerid},
+			userid = #{userid}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM jpush_register
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE jpush_register SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="Jpushregister" statementType="STATEMENT">
+		select * FROM jpush_register  where ${propertyName} = '${value}'
+	</select>
+
+	<select id="findJPushRegister" resultType="Jpushregister">
+		select * FROM jpush_register  where userid = #{userid} and registerid=#{registerid}
+	</select>
+
+	<update id="deleteJpushregister">
+		DELETE FROM jpush_register
+		WHERE userid = #{userid} or registerid=#{registerid}
+	</update>
+</mapper>

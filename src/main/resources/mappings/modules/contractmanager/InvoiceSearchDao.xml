@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.contractmanager.dao.InvoiceSearchDao">
+    
+	<sql id="invoiceSearchColumns">
+		a.id AS "id",
+		a.invoicetypeid AS "invoicetypeid",
+		a.invoicetype AS "invoicetype",
+		cm.id AS "contractid",
+		cm.contractname AS "contractname",
+		cm.contractno AS "contractno",
+		a.invoiceno AS "invoiceno",
+		cm.fundnatureid AS "fundnatureid",
+		cm.fundnature AS "fundnature",
+		ct.customername AS "customername",
+		a.money AS "money",
+		(case cm.fundnatureid when '1' then '已开出' when '2' then '已收到' else '' end) AS "status",
+		a.remark1 AS "remark1",
+		a.remark2 AS "remark2"
+	</sql>
+	
+	<sql id="invoiceSearchJoins">
+		left join contractmanager cm on a.contractmanager=cm.id 
+		left join customer ct on cm.contractpartyid=ct.id 
+	</sql>
+	
+    
+	<select id="get" resultType="InvoiceSearch" >
+		SELECT 
+			<include refid="invoiceSearchColumns"/>
+		FROM invoicesearch a
+		<include refid="invoiceSearchJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="InvoiceSearch" >
+		SELECT 
+			<include refid="invoiceSearchColumns"/>
+		FROM contractinvoice a
+		<include refid="invoiceSearchJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="createBy != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+			<if test="fundnatureid != null and fundnatureid != ''">
+				and cm.fundnatureid=#{fundnatureid}
+			</if>
+			<if test="contractname != null and contractname != ''">
+				AND cm.contractname like 
+					<if test="dbName == 'oracle'">'%'||#{contractname}||'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{contractname}, '%')</if>
+			</if>
+			<if test="contractno != null and contractno != ''">
+				AND cm.contractno like 
+					<if test="dbName == 'oracle'">'%'||#{contractno}||'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{contractno}, '%')</if>
+			</if>
+			<if test="customername != null and customername != ''">
+				AND ct.customername like 
+					<if test="dbName == 'oracle'">'%'||#{customername}||'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{customername}, '%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="InvoiceSearch" >
+		SELECT 
+			<include refid="invoiceSearchColumns"/>
+		FROM invoicesearch a
+		<include refid="invoiceSearchJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="createBy != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO invoicesearch(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			invoicetypeid,
+			invoicetype,
+			contractname,
+			contractno,
+			invoiceno,
+			fundnatureid,
+			fundnature,
+			customername,
+			money,
+			status,
+			remark1,
+			remark2
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{invoicetypeid},
+			#{invoicetype},
+			#{contractname},
+			#{contractno},
+			#{invoiceno},
+			#{fundnatureid},
+			#{fundnature},
+			#{customername},
+			#{money},
+			#{status},
+			#{remark1},
+			#{remark2}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE invoicesearch SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			invoicetypeid = #{invoicetypeid},
+			invoicetype = #{invoicetype},
+			contractname = #{contractname},
+			contractno = #{contractno},
+			invoiceno = #{invoiceno},
+			fundnatureid = #{fundnatureid},
+			fundnature = #{fundnature},
+			customername = #{customername},
+			money = #{money},
+			status = #{status},
+			remark1 = #{remark1},
+			remark2 = #{remark2}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM invoicesearch
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE invoicesearch SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="InvoiceSearch" statementType="STATEMENT">
+		select * FROM invoicesearch  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

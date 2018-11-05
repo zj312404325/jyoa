@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.ehr.dao.LeaveauditDao">
+    
+	<sql id="leaveauditColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.leaver AS "leaver",
+		a.officename AS "officename",
+		a.stationname AS "stationname",
+		a.entrydate AS "entrydate",
+		a.leavedate AS "leavedate",
+		a.leaveurl AS "leaveurl",
+		a.createusername AS "createusername",
+		a.leaverid AS "leaverid",
+		a.officeid AS "officeid",
+		a.stationid AS "stationid"
+	</sql>
+	
+	<sql id="leaveauditJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="Leaveaudit" >
+		SELECT 
+			<include refid="leaveauditColumns"/>
+		FROM leaveaudit a
+		<include refid="leaveauditJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Leaveaudit" >
+		SELECT 
+			<include refid="leaveauditColumns"/>
+		FROM leaveaudit a
+		<include refid="leaveauditJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+            <if test="leaver != null and leaver != ''">
+                AND a.leaver like
+                <if test="dbName == 'oracle'">'%'||#{leaver}||'%'</if>
+                <if test="dbName == 'mysql'">CONCAT('%', #{leaver}, '%')</if>
+            </if>
+            <if test="startdate != null and startdate != ''">
+                AND <![CDATA[to_char(a.create_date,'yyyy-mm-dd')>=to_char(#{startdate},'yyyy-mm-dd') ]]>
+            </if>
+            <if test="enddate != null and enddate != ''">
+                AND <![CDATA[to_char(a.create_date,'yyyy-mm-dd')<=to_char(#{enddate},'yyyy-mm-dd') ]]>
+            </if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Leaveaudit" >
+		SELECT 
+			<include refid="leaveauditColumns"/>
+		FROM leaveaudit a
+		<include refid="leaveauditJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO leaveaudit(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			leaver,
+			officename,
+			stationname,
+			entrydate,
+			leavedate,
+			leaveurl,
+			createusername,
+			leaverid,
+			officeid,
+			stationid
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{leaver},
+			#{officename},
+			#{stationname},
+			#{entrydate},
+			#{leavedate},
+			#{leaveurl},
+			#{createusername},
+			#{leaverid},
+			#{officeid},
+			#{stationid}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE leaveaudit SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			leaver = #{leaver},
+			officename = #{officename},
+			stationname = #{stationname},
+			entrydate = #{entrydate},
+			leavedate = #{leavedate},
+			leaveurl = #{leaveurl},
+			createusername = #{createusername},
+			leaverid = #{leaverid},
+			officeid = #{officeid},
+			stationid = #{stationid}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM leaveaudit
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE leaveaudit SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="Leaveaudit" statementType="STATEMENT">
+		select * FROM leaveaudit  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

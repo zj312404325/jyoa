@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.filemanagement.dao.ProjectManageDao">
+    
+	<sql id="projectManageColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.projectname AS "projectname",
+		a.projectno AS "projectno",
+		a.projectcategory AS "projectcategory",
+		a.projectgather AS "projectgather",
+		a.projectpayment AS "projectpayment",
+		a.gathercurrencytype AS "gathercurrencytype",
+		a.paymentcurrencytype AS "paymentcurrencytype",
+		a.planstartdate AS "planstartdate",
+		a.planenddate AS "planenddate",
+		a.backupone AS "backupone",
+		a.backuptwo AS "backuptwo",
+		a.officalid AS "officalid",
+		a.officalname AS "officalname",
+		a.createusername AS "createusername",
+		a.state AS "state",
+		a.receiveuserids AS "receiveuserids",
+		a.receiveusernames AS "receiveusernames"
+	</sql>
+	
+	<sql id="projectManageJoins">
+	 left join contractmanager m on m.projectid = a.id
+	</sql>
+	
+    
+	<select id="get" resultType="ProjectManage" >
+		SELECT 
+			<include refid="projectManageColumns"/>
+		FROM projectmanage a
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="ProjectManage" >
+		SELECT
+		    DISTINCT
+			<include refid="projectManageColumns"/>
+		FROM projectmanage a
+		<include refid="projectManageJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="startdate != null and startdate != ''">
+				AND <![CDATA[to_char(a.create_date,'yyyy-mm-dd')>=to_char(#{startdate},'yyyy-mm-dd') ]]>   
+			</if>
+			<if test="enddate != null and enddate != ''">
+				AND <![CDATA[to_char(a.create_date,'yyyy-mm-dd')<=to_char(#{enddate},'yyyy-mm-dd') ]]>
+			</if>
+			<if test="projectname != null and projectname != ''">
+				AND a.projectname like 
+					<if test="dbName == 'oracle'">'%'||#{projectname}||'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{projectname}, '%')</if>
+			</if>
+			<if test="projectno != null and projectno != ''">
+				AND a.projectno like 
+					<if test="dbName == 'oracle'">'%'||#{projectno}||'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{projectno}, '%')</if>
+			</if>
+			<if test="projectcategory != null and projectcategory != ''">
+				AND a.projectcategory= #{projectcategory} 
+			</if>
+			<if test="contractManager != null and contractManager.contractpartyid != null and contractManager.contractpartyid != ''">
+				AND m.contractpartyid= #{contractManager.contractpartyid} 
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND (a.create_by = #{createBy.id}
+				OR a.receiveuserids like '%'||#{createBy.id}||'%')
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="ProjectManage" >
+		SELECT 
+			<include refid="projectManageColumns"/>
+		FROM projectmanage a
+		<include refid="projectManageJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO projectmanage(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			projectname,
+			projectno,
+			projectcategory,
+			projectgather,
+			projectpayment,
+			gathercurrencytype,
+			paymentcurrencytype,
+			planstartdate,
+			planenddate,
+			backupone,
+			backuptwo,
+			officalid,
+			officalname,
+			createusername,
+			state,
+			receiveuserids,
+		    receiveusernames
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{projectname},
+			#{projectno},
+			#{projectcategory},
+			#{projectgather},
+			#{projectpayment},
+			#{gathercurrencytype},
+			#{paymentcurrencytype},
+			#{planstartdate},
+			#{planenddate},
+			#{backupone},
+			#{backuptwo},
+			#{officalid},
+			#{officalname},
+			#{createusername},
+			#{state},
+			#{receiveuserids},
+		    #{receiveusernames}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE projectmanage SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			projectname = #{projectname},
+			projectno = #{projectno},
+			projectcategory = #{projectcategory},
+			projectgather = #{projectgather},
+			projectpayment = #{projectpayment},
+			gathercurrencytype = #{gathercurrencytype},
+			paymentcurrencytype = #{paymentcurrencytype},
+			planstartdate = #{planstartdate},
+			planenddate = #{planenddate},
+			backupone = #{backupone},
+			backuptwo = #{backuptwo},
+			officalid = #{officalid},
+			officalname = #{officalname},
+			createusername = #{createusername},
+			state = #{state},
+			receiveuserids=#{receiveuserids},
+		    receiveusernames=#{receiveusernames}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM projectmanage
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE projectmanage SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="ProjectManage" statementType="STATEMENT">
+		select * FROM projectmanage  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

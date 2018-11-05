@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.leipiflow.dao.TemplateDetailDao">
+    
+	<sql id="templateDetailColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.var1 AS "var1",
+		a.var2 AS "var2",
+		a.var3 AS "var3",
+		a.var4 AS "var4",
+		a.var5 AS "var5",
+		a.var6 AS "var6",
+		a.var7 AS "var7",
+		a.var8 AS "var8",
+		a.var9 AS "var9",
+		a.var10 AS "var10",
+		a.var11 AS "var11",
+		a.var12 AS "var12",
+		a.var13 AS "var13",
+		a.var14 AS "var14",
+		a.var15 AS "var15",
+		a.flowapplyid AS "flowapplyid",
+		a.leipiflowid AS "leipiflowid",
+		a.sortno AS "sortno"
+	</sql>
+	
+	<sql id="templateDetailJoins">
+		LEFT JOIN flowapply f ON f.id = a.flowapplyid
+		LEFT JOIN leipi_run l ON f.process_instance_id = l.id
+		LEFT JOIN leipi_run_process p on f.process_instance_id=p.run_flow
+	</sql>
+	
+    
+	<select id="get" resultType="TemplateDetail" >
+		SELECT 
+			<include refid="templateDetailColumns"/>
+		FROM templatedetail a
+		<include refid="templateDetailJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="TemplateDetail" >
+		SELECT DISTINCT
+			<include refid="templateDetailColumns"/>
+		FROM templatedetail a
+		<include refid="templateDetailJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+            <if test="flowapply != null and flowapply.id != null and flowapply.id != ''">
+                AND a.flowapplyid = #{flowapply.id}
+            </if>
+            <if test="flowapplyid != null and flowapplyid != ''">
+                AND a.flowapplyid = #{flowapplyid}
+            </if>
+			<if test="leipiflowid != null and leipiflowid != ''">
+				AND a.leipiflowid = #{leipiflowid}
+			</if>
+			<if test="var1 != null and var1 != ''">
+				AND a.var1 LIKE
+				<if test="dbName == 'oracle'">'%'||#{var1}||'%'</if>
+				<if test="dbName == 'mysql'">CONCAT('%', #{var1}, '%')</if>
+			</if>
+			<if test="startdate != null and startdate != ''">
+				AND <![CDATA[to_char(a.create_date,'yyyy-mm-dd')>=to_char(#{startdate},'yyyy-mm-dd') ]]>
+			</if>
+			<if test="enddate != null and enddate != ''">
+				AND <![CDATA[to_char(a.create_date,'yyyy-mm-dd')<=to_char(#{enddate},'yyyy-mm-dd') ]]>
+			</if>
+			<if test="createuserid != null and createuserid != ''">
+				AND p.upid = #{createuserid}
+			</if>
+			<if test="flowstatus != null and flowstatus != ''">
+				AND l.status = #{flowstatus}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.sortno ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="TemplateDetail" >
+		SELECT 
+			<include refid="templateDetailColumns"/>
+		FROM templatedetail a
+		<include refid="templateDetailJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO templatedetail(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			var1,
+			var2,
+			var3,
+			var4,
+			var5,
+			var6,
+			var7,
+			var8,
+			var9,
+			var10,
+			var11,
+			var12,
+			var13,
+			var14,
+			var15,
+			flowapplyid,
+			leipiflowid,
+			sortno
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{var1},
+			#{var2},
+			#{var3},
+			#{var4},
+			#{var5},
+			#{var6},
+			#{var7},
+			#{var8},
+			#{var9},
+			#{var10},
+			#{var11},
+			#{var12},
+			#{var13},
+			#{var14},
+			#{var15},
+			#{flowapplyid},
+			#{leipiflowid},
+			#{sortno}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE templatedetail SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			var1 = #{var1},
+			var2 = #{var2},
+			var3 = #{var3},
+			var4 = #{var4},
+			var5 = #{var5},
+			var6 = #{var6},
+			var7 = #{var7},
+			var8 = #{var8},
+			var9 = #{var9},
+			var10 = #{var10},
+			var11 = #{var11},
+			var12 = #{var12},
+			var13 = #{var13},
+			var14 = #{var14},
+			var15 = #{var15},
+			flowapplyid = #{flowapplyid},
+			leipiflowid = #{leipiflowid},
+			sortno = #{sortno}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM templatedetail
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE templatedetail SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="TemplateDetail" statementType="STATEMENT">
+		select * FROM templatedetail  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

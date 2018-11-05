@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.leipiflow.dao.LeipiFlowProcessDao">
+    
+	<sql id="leipiFlowProcessColumns">
+		a.id AS "id",
+		a.flow_id AS "flowId",
+		a.process_name AS "processName",
+		a.process_type AS "processType",
+		a.process_to AS "processTo",
+		a.child_id AS "childId",
+		a.child_relation AS "childRelation",
+		a.child_after AS "childAfter",
+		a.child_back_process AS "childBackProcess",
+		a.return_sponsor_ids AS "returnSponsorIds",
+		a.return_respon_ids AS "returnResponIds",
+		a.write_fields AS "writeFields",
+		a.secret_fields AS "secretFields",
+		a.lock_fields AS "lockFields",
+		a.check_fields AS "checkFields",
+		a.auto_person AS "autoPerson",
+		a.auto_unlock AS "autoUnlock",
+		a.auto_sponsor_ids AS "autoSponsorIds",
+		a.auto_sponsor_text AS "autoSponsorText",
+		a.auto_respon_ids AS "autoResponIds",
+		a.auto_respon_text AS "autoResponText",
+		a.auto_role_ids AS "autoRoleIds",
+		a.auto_role_text AS "autoRoleText",
+		a.auto_process_sponsor AS "autoProcessSponsor",
+		a.range_user_ids AS "rangeUserIds",
+		a.range_user_text AS "rangeUserText",
+		a.range_dept_ids AS "rangeDeptIds",
+		a.range_dept_text AS "rangeDeptText",
+		a.range_role_ids AS "rangeRoleIds",
+		a.range_role_text AS "rangeRoleText",
+		a.receive_type AS "receiveType",
+		a.is_user_end AS "isUserEnd",
+		a.is_userop_pass AS "isUseropPass",
+		a.is_sing AS "isSing",
+		a.sign_look AS "signLook",
+		a.out_condition AS "outCondition",
+		a.setleft AS "setleft",
+		a.settop AS "settop",
+		a.style AS "style",
+		a.is_del AS "isdel",
+		a.updatetime AS "updatetime",
+		a.dateline AS "dateline",
+		a.is_back AS "isBack",
+		a.style_width AS "styleWidth",
+		a.style_height AS "styleHeight",
+		a.style_color AS "styleColor",
+		a.style_icon AS "styleIcon",
+		a.parallel AS "parallel"
+	</sql>
+	
+	<sql id="leipiFlowProcessJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="LeipiFlowProcess" >
+		SELECT 
+			<include refid="leipiFlowProcessColumns"/>
+		FROM leipi_flow_process a
+		<include refid="leipiFlowProcessJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="LeipiFlowProcess" >
+		SELECT 
+			<include refid="leipiFlowProcessColumns"/>
+		FROM leipi_flow_process a
+		<include refid="leipiFlowProcessJoins"/>
+		<where>
+		     1=1
+			 <if test="leipiFlow.id != null and leipiFlow.id != ''">
+				AND a.flow_id=#{leipiFlow.id} 
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="LeipiFlowProcess" >
+		SELECT 
+			<include refid="leipiFlowProcessColumns"/>
+		FROM leipi_flow_process a
+		<include refid="leipiFlowProcessJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO leipi_flow_process(
+			id,
+			flow_id,
+			process_name,
+			process_type,
+			process_to,
+			child_id,
+			child_relation,
+			child_after,
+			child_back_process,
+			return_sponsor_ids,
+			return_respon_ids,
+			write_fields,
+			secret_fields,
+			lock_fields,
+			check_fields,
+			auto_person,
+			auto_unlock,
+			auto_sponsor_ids,
+			auto_sponsor_text,
+			auto_respon_ids,
+			auto_respon_text,
+			auto_role_ids,
+			auto_role_text,
+			auto_process_sponsor,
+			range_user_ids,
+			range_user_text,
+			range_dept_ids,
+			range_dept_text,
+			range_role_ids,
+			range_role_text,
+			receive_type,
+			is_user_end,
+			is_userop_pass,
+			is_sing,
+			sign_look,
+			out_condition,
+			setleft,
+			settop,
+			style,
+			is_del,
+			updatetime,
+			dateline,
+			is_back,
+			style_width,
+			style_height,
+			style_color,
+			style_icon,
+			parallel
+		) VALUES (
+			#{id},
+			#{flowId},
+			#{processName},
+			#{processType},
+			#{processTo},
+			#{childId},
+			#{childRelation},
+			#{childAfter},
+			#{childBackProcess},
+			#{returnSponsorIds},
+			#{returnResponIds},
+			#{writeFields},
+			#{secretFields},
+			#{lockFields},
+			#{checkFields},
+			#{autoPerson},
+			#{autoUnlock},
+			#{autoSponsorIds},
+			#{autoSponsorText},
+			#{autoResponIds},
+			#{autoResponText},
+			#{autoRoleIds},
+			#{autoRoleText},
+			#{autoProcessSponsor},
+			#{rangeUserIds},
+			#{rangeUserText},
+			#{rangeDeptIds},
+			#{rangeDeptText},
+			#{rangeRoleIds},
+			#{rangeRoleText},
+			#{receiveType},
+			#{isUserEnd},
+			#{isUseropPass},
+			#{isSing},
+			#{signLook},
+			#{outCondition},
+			#{setleft},
+			#{settop},
+			#{style},
+			#{isdel},
+			#{updatetime},
+			#{dateline},
+			#{isBack},
+			#{styleWidth},
+			#{styleHeight},
+			#{styleColor},
+			#{styleIcon},
+			#{parallel}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE leipi_flow_process SET 	
+			process_name=#{processName},
+			process_type = #{processType},
+			process_to = #{processTo},
+			child_id = #{childId},
+			child_after = #{childAfter},
+			child_back_process = #{childBackProcess},
+			return_sponsor_ids = #{returnSponsorIds},
+			return_respon_ids = #{returnResponIds},
+			write_fields = #{writeFields},
+			secret_fields = #{secretFields},
+			lock_fields = #{lockFields},
+			check_fields = #{checkFields},
+			auto_person = #{autoPerson},
+			auto_unlock = #{autoUnlock},
+			auto_sponsor_ids = #{autoSponsorIds},
+			auto_sponsor_text = #{autoSponsorText},
+			auto_respon_ids = #{autoResponIds},
+			auto_respon_text = #{autoResponText},
+			auto_role_ids = #{autoRoleIds},
+			auto_role_text = #{autoRoleText},
+			auto_process_sponsor = #{autoProcessSponsor},
+			range_user_ids = #{rangeUserIds},
+			range_user_text = #{rangeUserText},
+			range_dept_ids = #{rangeDeptIds},
+			range_dept_text = #{rangeDeptText},
+			range_role_ids = #{rangeRoleIds},
+			range_role_text = #{rangeRoleText},
+			receive_type = #{receiveType},
+			is_user_end = #{isUserEnd},
+			is_userop_pass = #{isUseropPass},
+			is_sing = #{isSing},
+			sign_look = #{signLook},
+			out_condition = #{outCondition},
+			setleft = #{setleft},
+			settop = #{settop},
+			style = #{style},
+			is_del = #{isdel},
+			updatetime = #{updatetime},
+			dateline = #{dateline},
+			is_back = #{isBack},
+			style_width = #{styleWidth},
+			style_height = #{styleHeight},
+			style_color = #{styleColor},
+			style_icon = #{styleIcon},
+			parallel = #{parallel}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM leipi_flow_process
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE leipi_flow_process SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取记录 -->
+	<select id="findByProperty" resultType="LeipiFlowProcess" statementType="STATEMENT">
+		select * FROM leipi_flow_process  where ${propertyName} = '${value}'
+	</select>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="LeipiFlowProcess" statementType="STATEMENT">
+		select * FROM leipi_flow_process  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>
