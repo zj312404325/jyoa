@@ -62,6 +62,12 @@
 			<shiro:hasPermission name="checkmodel:weeklyReport:export">
 				<table:exportThisExcel url="${ctx}/checkmodel/reports/export?type=1"></table:exportThisExcel><!-- 导出按钮 -->
 			</shiro:hasPermission>
+
+			<shiro:hasPermission name="checkmodel:weeklyReport:viewExcel">
+				<a href="#" onclick="openDialogView('预览上周', '${ctx}/checkmodel/reports/viewExcel?type=0','1200px', '500px')" class="btn btn-info btn-xs" ><i class="fa fa-eye"></i>预览上周</a>
+				<a href="#" onclick="openDialogView('预览本周', '${ctx}/checkmodel/reports/viewExcel?type=1','1200px', '500px')" class="btn btn-info btn-xs" ><i class="fa fa-eye"></i>预览本周</a>
+			</shiro:hasPermission>
+
 			<shiro:hasPermission name="checkmodel:weeklyReport:lock">
 				<a href="${ctx}/checkmodel/reports/lock?type=0" onclick="return confirmxParent('确认要锁定这些周报吗？', this.href)"   class="btn btn-info btn-xs"><i class="fa fa-lock"></i> 锁定</a>
 			</shiro:hasPermission>

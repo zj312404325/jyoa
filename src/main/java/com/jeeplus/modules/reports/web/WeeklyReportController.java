@@ -440,4 +440,54 @@ public class WeeklyReportController extends BaseController{
         addMessage(redirectAttributes, "解锁周报成功");
         return "redirect:"+Global.getAdminPath()+"/checkmodel/reports/weeklyReportIndex?repage=repage&type="+request.getParameter("type");
     }
+
+    /**
+     * 预览周报
+     */
+    @RequiresPermissions("checkmodel:weeklyReport:viewExcel")
+    @RequestMapping(value = "viewExcel")
+    public String viewFile(WeeklyReport weeklyReport, HttpServletRequest request, HttpServletResponse response, RedirectAttributes redirectAttributes, Model model) {
+        String type=request.getParameter("type");
+
+        //查找考核人记录
+        User user =UserUtils.getUser();
+        CheckUser tempCheckUser=new CheckUser();
+        tempCheckUser.setUserId(user.getId());
+        List<CheckUser> checkUserList=checkUserService.findList(tempCheckUser);
+        if(FormatUtil.isNoEmpty(checkUserList)&&checkUserList.size()>0){
+            StringBuilder sqlstr=new StringBuilder();
+            for (int i = 0; i < checkUserList.size(); i++) {
+                sqlstr.append(" ((a.officeid='"+checkUserList.get(i).getCheckofficeid()+"' or o.parent_ids like '%"+checkUserList.get(i).getCheckofficeid()+"%') and a.stationid='"+checkUserList.get(i).getStationId()+"') or");
+            }
+            String ids=sqlstr.toString();
+            if(FormatUtil.isNoEmpty(ids)){
+                ids=sqlstr.toString().substring(0,ids.length()-2);
+            }
+            weeklyReport.setSqlstr(ids);
+        }
+
+        Page<WeeklyReport> page = weeklyReportService.findPage(new Page<WeeklyReport>(request, response, -1), weeklyReport);
+        List<WeeklyReportDetail> list=Lists.newArrayList();
+        for(WeeklyReport w:page.getList()){
+            w=weeklyReportService.get(w.getId());
+            List<WeeklyReportDetail> tmplist;
+            if("0".equalsIgnoreCase(type)){
+                tmplist=w.getWeeklyReportDetailList();
+            }
+            else{
+                tmplist=w.getWeeklyReportDetailListKey();
+            }
+            for(WeeklyReportDetail d:tmplist){
+                d.setExceldate(w.getCreateDate());
+                d.setExcelofficename(w.getOfficename());
+                d.setExcelstationname(w.getStationname());
+                d.setExceltitle(w.getTitle());
+                d.setExcelusername(w.getUsername());
+                d.setExceluserno(w.getUserno());
+                list.add(d);
+            }
+        }
+        model.addAttribute("weeklyReportDetail", list);
+        return "modules/reports/weeklyReportViewList";
+    }
 }
