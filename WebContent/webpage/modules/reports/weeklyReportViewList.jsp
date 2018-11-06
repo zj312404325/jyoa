@@ -28,62 +28,55 @@
 <body class="hideScroll">
 	<div class="panel-body">
 	<sys:message content="${message}"/>
+
+	<!--查询条件-->
+	<form:form class="form-inline">
+		<table:sortColumn id="orderBy" name="orderBy" value="${page.orderBy}" callback="sortOrRefresh();"/><!-- 支持排序 -->
+		<div class="form-group">
+			<span>开始时间：</span>
+			<input id="startdate" name="startdate" disabled="disabled" type="text" maxlength="20" class="laydate-icon form-control layer-date required"
+				   value="<fmt:formatDate value="${weeklyReport.startdate}" pattern="yyyy-MM-dd"/>"/>
+			<span>结束时间：</span>
+			<input id="enddate" name="enddate" disabled="disabled" type="text" maxlength="20" class="laydate-icon form-control layer-date required"
+				   value="<fmt:formatDate value="${weeklyReport.enddate}" pattern="yyyy-MM-dd"/>"/>
+		</div>
+	</form:form>
 	
 	<!-- 表格 -->
 	<table id="contentTable" class="table table-striped table-bordered table-hover table-condensed dataTables-example dataTable">
 		<thead>
 			<tr>
-				<th>周报标题</th>
-				<th>姓名</th>
-				<th>用户编号</th>
-				<th>部门名称</th>
-				<th>岗位名称</th>
-				<th>提交时间</th>
-				<th>项目</th>
-				<th>任务类型</th>
-				<th>任务描述</th>
-				<th>内容</th>
-				<th>任务状态</th>
-				<th>花费时间(天)</th>
+				<th width="5">姓名</th>
+				<th width="5">项目</th>
+				<th width="10">任务类型</th>
+				<th width="160">任务描述</th>
+				<th width="160">内容</th>
+				<th width="10">任务状态</th>
+				<th width="5">花费时间(天)</th>
 			</tr>
 		</thead>
 		<tbody>
 		<c:forEach items="${weeklyReportDetail}" var="weeklyReportDetail">
 			<tr>
-				<td>
-					${weeklyReportDetail.exceltitle}
-				</td>
-				<td>
+				<td width="5">
 					${weeklyReportDetail.excelusername}
 				</td>
-				<td>
-					${weeklyReportDetail.exceluserno}
-				</td>
-				<td>
-					${weeklyReportDetail.excelofficename}
-				</td>
-				<td>
-					${weeklyReportDetail.excelstationname}
-				</td>
-				<td>
-					<fmt:formatDate value="${weeklyReportDetail.exceldate}" pattern="yyyy-MM-dd HH:mm:ss"/>
-				</td>
-				<td>
+				<td width="5">
 					${weeklyReportDetail.project}
 				</td>
-				<td>
+				<td width="10">
 					${weeklyReportDetail.tasktype}
 				</td>
-				<td>
+				<td width="160">
 					${weeklyReportDetail.taskdesc}
 				</td>
-				<td>
+				<td width="160">
 					${weeklyReportDetail.content}
 				</td>
-				<td>
+				<td width="10">
 					${weeklyReportDetail.taskstatus}
 				</td>
-				<td>
+				<td width="5">
 					${weeklyReportDetail.days}
 				</td>
 

@@ -2,6 +2,7 @@ package com.jeeplus.modules.reports.web;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.Collator;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -448,7 +449,6 @@ public class WeeklyReportController extends BaseController{
     @RequestMapping(value = "viewExcel")
     public String viewFile(WeeklyReport weeklyReport, HttpServletRequest request, HttpServletResponse response, RedirectAttributes redirectAttributes, Model model) {
         String type=request.getParameter("type");
-
         //查找考核人记录
         User user =UserUtils.getUser();
         CheckUser tempCheckUser=new CheckUser();
@@ -487,7 +487,18 @@ public class WeeklyReportController extends BaseController{
                 list.add(d);
             }
         }
+
+        //拼音排序
+        Collections.sort(list, new Comparator<WeeklyReportDetail>() {
+            @Override
+            public int compare(WeeklyReportDetail o1, WeeklyReportDetail o2) {
+                Comparator<Object> com = Collator.getInstance(java.util.Locale.CHINA);
+                return com.compare(o1.getExcelusername(), o2.getExcelusername());
+            }
+        });
+
         model.addAttribute("weeklyReportDetail", list);
+        model.addAttribute("weeklyReport", weeklyReport);
         return "modules/reports/weeklyReportViewList";
     }
 }

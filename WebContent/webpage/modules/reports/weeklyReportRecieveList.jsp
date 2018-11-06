@@ -23,6 +23,14 @@
 	            event: 'focus' //响应事件。如果没有传入event，则按照默认的click
 	        });
 		});
+        function jumpLastView() {
+            var url='${ctx}/checkmodel/reports/viewExcel?type=0&startdate='+$("#startdate").val()+'&enddate='+$("#enddate").val();
+            openDialogView('预览上周', url,'1200px', '500px')
+        }
+        function jumpThisView() {
+            var url='${ctx}/checkmodel/reports/viewExcel?type=1&startdate='+$("#startdate").val()+'&enddate='+$("#enddate").val();
+            openDialogView('预览本周', url,'1200px', '500px')
+        }
 	</script>
 </head>
 <body class="hideScroll">
@@ -57,15 +65,17 @@
 	<div class="col-sm-12">
 		<div class="pull-left">
 			<shiro:hasPermission name="checkmodel:weeklyReport:export">
-				<table:exportLastExcel url="${ctx}/checkmodel/reports/export?type=0"></table:exportLastExcel><!-- 导出按钮 -->
+				<table:exportLastExcel url="${ctx}/checkmodel/reports/export?type=0&startdate="></table:exportLastExcel><!-- 导出按钮 -->
 			</shiro:hasPermission>
 			<shiro:hasPermission name="checkmodel:weeklyReport:export">
 				<table:exportThisExcel url="${ctx}/checkmodel/reports/export?type=1"></table:exportThisExcel><!-- 导出按钮 -->
 			</shiro:hasPermission>
 
 			<shiro:hasPermission name="checkmodel:weeklyReport:viewExcel">
-				<a href="#" onclick="openDialogView('预览上周', '${ctx}/checkmodel/reports/viewExcel?type=0','1200px', '500px')" class="btn btn-info btn-xs" ><i class="fa fa-eye"></i>预览上周</a>
-				<a href="#" onclick="openDialogView('预览本周', '${ctx}/checkmodel/reports/viewExcel?type=1','1200px', '500px')" class="btn btn-info btn-xs" ><i class="fa fa-eye"></i>预览本周</a>
+				<a href="#" onclick="jumpLastView()" class="btn btn-info btn-xs" ><i class="fa fa-eye"></i>预览上周</a>
+				<a href="#" onclick="jumpThisView()" class="btn btn-info btn-xs" ><i class="fa fa-eye"></i>预览本周</a>
+				<%--<a href="#" onclick="openDialogView('预览上周', '${ctx}/checkmodel/reports/viewExcel?type=0&startDate=','1200px', '500px')" class="btn btn-info btn-xs" ><i class="fa fa-eye"></i>预览上周</a>
+				<a href="#" onclick="openDialogView('预览本周', '${ctx}/checkmodel/reports/viewExcel?type=1','1200px', '500px')" class="btn btn-info btn-xs" ><i class="fa fa-eye"></i>预览本周</a>--%>
 			</shiro:hasPermission>
 
 			<shiro:hasPermission name="checkmodel:weeklyReport:lock">
@@ -85,7 +95,7 @@
 			<tr>
 				<th> <input type="checkbox" class=""></th>
 				<th>员工编号</th>
-				<th>员工姓名</th>
+				<th  class="sort-column username">员工姓名</th>
 				<th  class="sort-column officename">部门</th>
 				<th  class="sort-column stationname">岗位</th>
 				<th  class="sort-column create_date">填表日期</th>
