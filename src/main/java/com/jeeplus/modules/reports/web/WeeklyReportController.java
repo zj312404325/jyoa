@@ -501,4 +501,71 @@ public class WeeklyReportController extends BaseController{
         model.addAttribute("weeklyReport", weeklyReport);
         return "modules/reports/weeklyReportViewList";
     }
+
+    /**
+     * 工时统计
+     */
+    @RequiresPermissions("checkmodel:weeklyReport:viewExcel")
+    @RequestMapping(value = "viewSum")
+    public String viewSum(WeeklyReport weeklyReport, HttpServletRequest request, HttpServletResponse response, RedirectAttributes redirectAttributes, Model model) {
+        String type=request.getParameter("type");
+        //查找考核人记录
+        User user =UserUtils.getUser();
+        CheckUser tempCheckUser=new CheckUser();
+        tempCheckUser.setUserId(user.getId());
+        List<CheckUser> checkUserList=checkUserService.findList(tempCheckUser);
+        if(FormatUtil.isNoEmpty(checkUserList)&&checkUserList.size()>0){
+            StringBuilder sqlstr=new StringBuilder();
+            for (int i = 0; i < checkUserList.size(); i++) {
+                sqlstr.append(" ((a.officeid='"+checkUserList.get(i).getCheckofficeid()+"' or o.parent_ids like '%"+checkUserList.get(i).getCheckofficeid()+"%') and a.stationid='"+checkUserList.get(i).getStationId()+"') or");
+            }
+            String ids=sqlstr.toString();
+            if(FormatUtil.isNoEmpty(ids)){
+                ids=sqlstr.toString().substring(0,ids.length()-2);
+            }
+            weeklyReport.setSqlstr(ids);
+        }
+
+        Page<WeeklyReport> page = weeklyReportService.findPage(new Page<WeeklyReport>(request, response, -1), weeklyReport);
+        List<WeeklyReportDetail> list=Lists.newArrayList();
+        for(WeeklyReport w:page.getList()){
+            w=weeklyReportService.get(w.getId());
+            List<WeeklyReportDetail> tmplist;
+            if("0".equalsIgnoreCase(type)){
+                tmplist=w.getWeeklyReportDetailList();
+            }
+            else{
+                tmplist=w.getWeeklyReportDetailListKey();
+            }
+            for(WeeklyReportDetail d:tmplist){
+                d.setExceldate(w.getCreateDate());
+                d.setExcelofficename(w.getOfficename());
+                d.setExcelstationname(w.getStationname());
+                d.setExceltitle(w.getTitle());
+                d.setExcelusername(w.getUsername());
+                d.setExceluserno(w.getUserno());
+                list.add(d);
+            }
+        }
+
+        //工时合并统计
+        List<WeeklyReportDetail> resultList=Lists.newArrayList();
+        resultList=weeklyReportService.findSumList(weeklyReport);
+
+        for(WeeklyReportDetail detail:resultList){
+            detail.setExcelusername(UserUtils.get(detail.getCreateBy().getId()).getName());
+        }
+        //拼音排序
+        Collections.sort(resultList, new Comparator<WeeklyReportDetail>() {
+            @Override
+            public int compare(WeeklyReportDetail o1, WeeklyReportDetail o2) {
+                Comparator<Object> com = Collator.getInstance(java.util.Locale.CHINA);
+                return com.compare(o1.getExcelusername(), o2.getExcelusername());
+            }
+        });
+
+        model.addAttribute("weeklyReportDetail", resultList);
+        model.addAttribute("weeklyReport", weeklyReport);
+        return "modules/reports/weeklyReportSumList";
+    }
 }

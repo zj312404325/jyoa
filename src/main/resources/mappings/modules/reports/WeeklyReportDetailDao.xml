@@ -20,6 +20,13 @@
 		a.task_type AS "taskType",
 		a.weeklyreportid AS "weeklyreportid"
 	</sql>
+
+	<sql id="weeklyReportDetailSumColumns">
+		a.create_by AS "createBy.id",
+		b.username AS "username",
+		sum(a.cost_days) AS "costDays",
+		a.project AS "project"
+	</sql>
 	
 	<sql id="weeklyReportDetailJoins">
 		LEFT JOIN weeklyreport b ON b.id = a.weeklyreportid
@@ -97,6 +104,24 @@
 				ORDER BY a.create_date ASC
 			</otherwise>
 		</choose>
+	</select>
+
+	<select id="findSumList" resultType="WeeklyReportDetail" >
+		SELECT
+		<include refid="weeklyReportDetailSumColumns"/>
+		FROM weeklyreportdetail a
+		<include refid="weeklyReportDetailJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			AND a.week_flag=0
+			<if test="weeklyreport.startdate != null and weeklyreport.startdate != ''">
+				AND <![CDATA[to_char(b.create_date,'yyyy-mm-dd')>=to_char(#{weeklyreport.startdate},'yyyy-mm-dd') ]]>
+			</if>
+			<if test="weeklyreport.enddate != null and weeklyreport.enddate != ''">
+				AND <![CDATA[to_char(b.create_date,'yyyy-mm-dd')<=to_char(#{weeklyreport.enddate},'yyyy-mm-dd') ]]>
+			</if>
+		</where>
+		GROUP BY a.create_by,a.project,b.username
 	</select>
 	
 	<select id="findAllList" resultType="WeeklyReportDetail" >

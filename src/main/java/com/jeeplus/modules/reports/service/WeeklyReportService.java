@@ -64,6 +64,10 @@ public class WeeklyReportService extends CrudService<WeeklyReportDao, WeeklyRepo
         return super.findPage(page, weeklyReport);
     }
 
+    public List<WeeklyReportDetail> findSumList(WeeklyReport weeklyReport) {
+        return weeklyReportDetailDao.findSumList(new WeeklyReportDetail(weeklyReport));
+    }
+
     @Override
     @Transactional(readOnly = false,rollbackFor = Exception.class)
     public void save(WeeklyReport weeklyReport) {

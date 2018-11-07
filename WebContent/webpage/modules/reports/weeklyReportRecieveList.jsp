@@ -31,6 +31,10 @@
             var url='${ctx}/checkmodel/reports/viewExcel?type=1&startdate='+$("#startdate").val()+'&enddate='+$("#enddate").val();
             openDialogView('预览本周', url,'1200px', '500px')
         }
+        function jumpTimeSum() {
+            var url='${ctx}/checkmodel/reports/viewSum?type=0&startdate='+$("#startdate").val()+'&enddate='+$("#enddate").val();
+            openDialogView('工时统计', url,'1200px', '500px')
+        }
 	</script>
 </head>
 <body class="hideScroll">
@@ -74,6 +78,7 @@
 			<shiro:hasPermission name="checkmodel:weeklyReport:viewExcel">
 				<a href="#" onclick="jumpLastView()" class="btn btn-info btn-xs" ><i class="fa fa-eye"></i>预览上周</a>
 				<a href="#" onclick="jumpThisView()" class="btn btn-info btn-xs" ><i class="fa fa-eye"></i>预览本周</a>
+				<a href="#" onclick="jumpTimeSum()" class="btn btn-info btn-xs" ><i class="fa fa-eye"></i>工时统计</a>
 				<%--<a href="#" onclick="openDialogView('预览上周', '${ctx}/checkmodel/reports/viewExcel?type=0&startDate=','1200px', '500px')" class="btn btn-info btn-xs" ><i class="fa fa-eye"></i>预览上周</a>
 				<a href="#" onclick="openDialogView('预览本周', '${ctx}/checkmodel/reports/viewExcel?type=1','1200px', '500px')" class="btn btn-info btn-xs" ><i class="fa fa-eye"></i>预览本周</a>--%>
 			</shiro:hasPermission>
